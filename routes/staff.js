@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const pool = require('../db/database');
 
+const axios = require('axios'); // 👈 Add this at the top of the file
+
 // --- HELPER: Admin Only Middleware ---
 function isAdmin(req, res, next) {
   if (req.session.userId && req.session.role === 'admin') {
@@ -15,35 +17,44 @@ function isAdmin(req, res, next) {
 
 // --- HELPER: Send Welcome Email with Temporary Password ---
 // --- HELPER: Send Welcome Email with Temporary Password ---
+// --- HELPER: Send Welcome Email with Brevo API ---
 async function sendWelcomeEmail(email, tempPassword) {
-  let transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false, // TLS
-    auth: {
-      user: process.env.BREVO_SMTP_USER, // Your SMTP login (e.g., af1510001@smtp-brevo.com)
-      pass: process.env.BREVO_SMTP_PASSWORD // Your SMTP key
-    }
-  });
-
-  let loginLink = `https://${process.env.APP_URL || 'localhost:3000'}/login`;
+  const loginLink = `https://${process.env.APP_URL || 'localhost:3000'}/login`;
   
-  let info = await transporter.sendMail({
-    from: `"CRM Admin" <${process.env.EMAIL_FROM || 'noreply@crm.com'}>`,
-    to: email,
-    subject: "Welcome to the CRM! Your Staff Account",
-    html: `
-      <h3>Welcome to the team! 🎉</h3>
-      <p>Your staff account has been created. Here are your login credentials:</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Temporary Password:</strong> <code>${tempPassword}</code></p>
-      <p><a href="${loginLink}">Click here to log in</a></p>
-      <p>⚠️ Please change your password immediately after logging in.</p>
-    `,
-  });
-
-  console.log("📧 Email sent to:", email);
-  return true;
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: { 
+          email: process.env.EMAIL_FROM || 'noreply@crm.com',
+          name: 'CRM Admin'
+        },
+        to: [{ email: email }],
+        subject: "Welcome to the CRM! Your Staff Account",
+        htmlContent: `
+          <h3>Welcome to the team! 🎉</h3>
+          <p>Your staff account has been created. Here are your login credentials:</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Temporary Password:</strong> <code>${tempPassword}</code></p>
+          <p><a href="${loginLink}">Click here to log in</a></p>
+          <p>⚠️ Please change your password immediately after logging in.</p>
+        `
+      },
+      {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000 // 15 second timeout
+      }
+    );
+    
+    console.log("📧 Email sent to:", email);
+    return true;
+  } catch (error) {
+    console.error("❌ Email error:", error.response?.data || error.message);
+    return false;
+  }
 }
 
 
