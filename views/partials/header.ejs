@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Reserve Shop</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome Icons (for nice icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Custom Override Styles -->
+  <style>
+    body {
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    .auth-wrapper {
+      min-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-shadow {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      border: none;
+      border-radius: 16px;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .btn-primary {
+      background: #4f46e5;
+      border: none;
+    }
+    .btn-primary:hover {
+      background: #4338ca;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-compass me-2"></i>The Reserve Shop
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <% if (user && user.userId) { %>
+          <!-- Logged in -->
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">
+              <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="/contacts">
+              <i class="fas fa-address-book me-1"></i> Contacts
+            </a>
+          </li>
+
+          <!-- Only show Staff link if user is admin -->
+          <% if (user && user.role === 'admin') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/staff">
+                <i class="fas fa-users-cog me-1"></i> Staff
+              </a>
+            </li>
+          <% } %>
+
+          <li class="nav-item">
+            <a class="nav-link" href="/profile">
+              <i class="fas fa-user-cog me-1"></i> Profile
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link text-danger" href="/logout">
+              <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </a>
+          </li>
+
+
+          <li class="nav-item">
+            <span class="nav-link text-light">
+              <i class="fas fa-user me-1"></i> <%= user.fullName || user.email %>
+            </span>
+          </li>
+
+
+
+        <% } else { %>
+          <!-- Logged out -->
+          <li class="nav-item">
+            <a class="nav-link active" href="/login">
+              <i class="fas fa-lock me-1"></i> Login
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT STARTS HERE -->
+<div class="container">

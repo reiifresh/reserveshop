@@ -1,0 +1,78 @@
+<%- include('partials/header') %>
+
+<div class="row mt-4">
+  <div class="col-md-8 mx-auto">
+    <h4 class="mb-3">
+      <i class="fas fa-user-cog text-primary me-2"></i>Account Settings
+    </h4>
+    
+    <!-- Global Error/Success Alerts -->
+    <% if (error) { %>
+      <div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i><%= error %></div>
+    <% } %>
+    <% if (success) { %>
+      <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i><%- success %></div>
+    <% } %>
+
+    <!-- CARD 1: Update Email -->
+    <div class="card card-shadow mb-4">
+      <div class="card-body p-4">
+        <h5 class="mb-3"><i class="fas fa-envelope text-primary me-2"></i>Change Email</h5>
+        <p class="text-muted small mb-3">Update your login email. You must confirm your current password.</p>
+        
+        <form method="POST" action="/profile">
+          <div class="mb-3">
+            <label class="form-label">Current Email</label>
+            <input type="email" class="form-control bg-light" value="<%= userEmail %>" disabled>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Current Password <span class="text-danger">*</span></label>
+            <input type="password" name="currentPassword" class="form-control" placeholder="Enter your current password" required>
+          </div>
+          <hr>
+          <div class="mb-3">
+            <label class="form-label">New Email <span class="text-danger">*</span></label>
+            <input type="email" name="newEmail" class="form-control" placeholder="your@newemail.com" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm New Email <span class="text-danger">*</span></label>
+            <input type="email" name="confirmEmail" class="form-control" placeholder="Confirm your new email" required>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>Update Email
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- CARD 2: Update Password (NEW) -->
+    <div class="card card-shadow">
+      <div class="card-body p-4">
+        <h5 class="mb-3"><i class="fas fa-key text-warning me-2"></i>Change Password</h5>
+        <p class="text-muted small mb-3">Update your login password. Must be at least 6 characters.</p>
+        
+        <form method="POST" action="/profile/password">
+          <div class="mb-3">
+            <label class="form-label">Current Password <span class="text-danger">*</span></label>
+            <input type="password" name="currentPassword" class="form-control" placeholder="Enter your current password" required>
+          </div>
+          <hr>
+          <div class="mb-3">
+            <label class="form-label">New Password <span class="text-danger">*</span></label>
+            <input type="password" name="newPassword" class="form-control" placeholder="Min 6 characters" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm New Password <span class="text-danger">*</span></label>
+            <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm your new password" required>
+          </div>
+          <button type="submit" class="btn btn-warning text-dark">
+            <i class="fas fa-key me-2"></i>Update Password
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include('partials/footer') %>
