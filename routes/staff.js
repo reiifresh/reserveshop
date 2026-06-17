@@ -46,9 +46,6 @@ async function sendWelcomeEmail(email, tempPassword) {
   return true;
 }
 
-  console.log("📧 Email sent to:", email);
-  return true;
-}
 
 // --- ROUTE: List All Staff (Admin Only) ---
 router.get('/staff', isAdmin, async (req, res) => {
