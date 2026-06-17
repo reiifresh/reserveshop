@@ -15,17 +15,23 @@ function isAdmin(req, res, next) {
 
 // --- HELPER: Send Welcome Email with Temporary Password ---
 async function sendWelcomeEmail(email, tempPassword) {
-  let testAccount = await nodemailer.createTestAccount();
   let transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false,
-    auth: { user: testAccount.user, pass: testAccount.pass },
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // 👈 Use SSL (not TLS)
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    },
+    tls: {
+      rejectUnauthorized: false // 👈 This helps with cloud deployments
+    }
   });
 
-  let loginLink = `http://localhost:3000/login`;
+  let loginLink = `https://${process.env.APP_URL || 'localhost:3000'}/login`;
+  
   let info = await transporter.sendMail({
-    from: '"CRM Admin" <noreply@crm.com>',
+    from: `"CRM Admin" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Welcome to the CRM! Your Staff Account",
     html: `
@@ -38,7 +44,7 @@ async function sendWelcomeEmail(email, tempPassword) {
     `,
   });
 
-  console.log("📧 Welcome Email Preview URL: " + nodemailer.getTestMessageUrl(info));
+  console.log("📧 Email sent to:", email);
   return true;
 }
 
