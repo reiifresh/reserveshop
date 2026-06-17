@@ -14,27 +14,22 @@ function isAdmin(req, res, next) {
 }
 
 // --- HELPER: Send Welcome Email with Temporary Password ---
+// --- HELPER: Send Welcome Email with Temporary Password ---
 async function sendWelcomeEmail(email, tempPassword) {
   let transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // 👈 Use SSL (not TLS)
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false, // TLS
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    },
-    tls: {
-      rejectUnauthorized: false // 👈 This helps with cloud deployments
-    },
-      connectionTimeout: 10000, // 10 seconds
-      socketTimeout: 10000,
-      family: 4 // 👈 THIS FORCES IPv4
+      user: process.env.BREVO_SMTP_USER, // Your SMTP login (e.g., af1510001@smtp-brevo.com)
+      pass: process.env.BREVO_SMTP_PASSWORD // Your SMTP key
+    }
   });
 
   let loginLink = `https://${process.env.APP_URL || 'localhost:3000'}/login`;
   
   let info = await transporter.sendMail({
-    from: `"CRM Admin" <${process.env.EMAIL_USER}>`,
+    from: `"CRM Admin" <${process.env.EMAIL_FROM || 'noreply@crm.com'}>`,
     to: email,
     subject: "Welcome to the CRM! Your Staff Account",
     html: `
@@ -46,6 +41,10 @@ async function sendWelcomeEmail(email, tempPassword) {
       <p>⚠️ Please change your password immediately after logging in.</p>
     `,
   });
+
+  console.log("📧 Email sent to:", email);
+  return true;
+}
 
   console.log("📧 Email sent to:", email);
   return true;
