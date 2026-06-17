@@ -6,6 +6,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
+
 // Middleware to read form data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -20,6 +23,14 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 60000 * 60 } // 1 hour
+    store: new MySQLStore({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
+  })
+
+  
 }));
 
 // Make user session available to ALL views (for the navbar)
