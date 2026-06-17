@@ -25,7 +25,10 @@ async function sendWelcomeEmail(email, tempPassword) {
     },
     tls: {
       rejectUnauthorized: false // 👈 This helps with cloud deployments
-    }
+    },
+      connectionTimeout: 10000, // 10 seconds
+      socketTimeout: 10000,
+      family: 4 // 👈 THIS FORCES IPv4
   });
 
   let loginLink = `https://${process.env.APP_URL || 'localhost:3000'}/login`;
