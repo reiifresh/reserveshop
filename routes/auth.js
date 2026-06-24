@@ -356,13 +356,15 @@ router.post('/profile/password', isAuthenticated, async (req, res) => {
     // 5. Update the database
     await pool.query(`UPDATE users SET password = ? WHERE id = ?`, [hashedPassword, req.session.userId]);
 
+    await logActivity(req.session.userId, req.session.email, 'PASSWORD_UPDATED', 'Password changed', req);
+
     // 6. Show success message
     res.render('profile', { 
       userEmail: req.session.email, 
       error: null, 
       success: '✅ Password updated successfully! You can continue using the app.' 
 
-      await logActivity(req.session.userId, req.session.email, 'PASSWORD_UPDATED', 'Password changed', req);
+      
 
     });
 
