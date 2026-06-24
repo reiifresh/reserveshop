@@ -275,8 +275,14 @@ router.post('/profile', isAuthenticated, async (req, res) => {
     // 5. ALL CHECKS PASSED! Update the email in the database
     await pool.query(`UPDATE users SET email = ? WHERE id = ?`, [newEmail, req.session.userId]);
 
+
+    await logActivity(req.session.userId, req.session.email, 'EMAIL_UPDATED', `Changed to ${newEmail}`, req);
+
     // 6. Update the session so the navbar updates immediately
     req.session.email = newEmail;
+
+
+
 
     // 7. Show success message
     res.render('profile', { 
@@ -284,7 +290,7 @@ router.post('/profile', isAuthenticated, async (req, res) => {
       error: null, 
       success: '✅ Email updated successfully!' 
 
-      await logActivity(req.session.userId, req.session.email, 'EMAIL_UPDATED', `Changed to ${newEmail}`, req);
+      
 
     });
 
