@@ -68,6 +68,12 @@
             </a>
           </li>
 
+          <li class="nav-item">
+            <a class="nav-link" href="/profile">
+              <i class="fas fa-user-cog me-1"></i> Profile
+            </a>
+          </li>
+
           <!-- Only show Staff link if user is admin -->
           <% if (user && user.role === 'admin') { %>
             <li class="nav-item">
@@ -77,11 +83,14 @@
             </li>
           <% } %>
 
-          <li class="nav-item">
-            <a class="nav-link" href="/profile">
-              <i class="fas fa-user-cog me-1"></i> Profile
-            </a>
-          </li>
+
+          <% if (user && user.role === 'admin') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/logs">
+                <i class="fas fa-history me-1"></i> Activity Log
+              </a>
+            </li>
+          <% } %>
 
           <li class="nav-item">
             <a class="nav-link text-danger" href="/logout">

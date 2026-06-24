@@ -44,6 +44,26 @@ async function initDB() {
     `);
     console.log("✅ Contacts table ready in MySQL.");
 
+
+    // Inside initDB() function, after the contacts table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS activity_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT,
+        user_email VARCHAR(255),
+        action VARCHAR(50) NOT NULL,
+        details TEXT,
+        ip_address VARCHAR(45),
+        user_agent TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX (user_id),
+        INDEX (action),
+        INDEX (created_at)
+      )
+    `);
+    console.log("✅ Activity logs table ready.");
+    
+
     // --- INSERT A SAMPLE CONTACT SO YOU HAVE SOMETHING TO SEE ---
     const [contactRows] = await connection.query(`SELECT * FROM contacts LIMIT 1`);
     if (contactRows.length === 0) {

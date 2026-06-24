@@ -7,6 +7,8 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const logsRoutes = require('./routes/logs');
+
 // Middleware to read form data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -44,6 +46,7 @@ const staffRoutes = require('./routes/staff');
 app.use('/', authRoutes);
 app.use('/', contactRoutes);
 app.use('/', staffRoutes);
+app.use('/', logsRoutes);
 
 // Start the server
 app.listen(PORT, () => {

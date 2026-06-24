@@ -109,6 +109,8 @@ router.post('/staff/add', isAdmin, async (req, res) => {
     await pool.query(`INSERT INTO users (email, password, role, full_name) VALUES (?, ?, ?, ?)`, 
       [email.trim(), hashedPassword, 'staff', fullName.trim()]);
 
+    await logActivity(req.session.userId, req.session.email, 'STAFF_CREATED', `Staff "${email}" created`, req);
+
     // 4. Send the welcome email with the temp password
     await sendWelcomeEmail(email.trim(), tempPassword);
 
@@ -135,6 +137,9 @@ router.get('/staff/delete/:id', isAdmin, async (req, res) => {
     }
 
     await pool.query(`DELETE FROM users WHERE id = ?`, [id]);
+
+    await logActivity(req.session.userId, req.session.email, 'STAFF_DELETED', `Staff ID ${id} deleted`, req);
+    
     res.redirect('/staff');
   } catch (err) {
     console.error(err);

@@ -7,7 +7,7 @@ const pool = require('../db/database');
 
 
 const axios = require('axios'); // 👈 Make sure this is at the top of the file
-
+const logActivity = require('../helpers/activityLogger');
 
 // --- HELPER: Middleware to protect routes ---
 function isAuthenticated(req, res, next) {
@@ -88,6 +88,8 @@ router.post('/login', async (req, res) => {
     req.session.email = user.email;
     req.session.role = user.role; // 👈 Store the role
     req.session.fullName = user.full_name || 'User'; // 👈 ADD THIS
+
+    await logActivity(user.id, user.email, 'LOGIN', null, req);
     
     res.redirect('/dashboard');
 
@@ -103,7 +105,10 @@ router.get('/dashboard', isAuthenticated, (req, res) => {
 });
 
 // --- ROUTE: Logout ---
-router.get('/logout', (req, res) => {
+router.get('/logout', async (req, res) => {
+  if (req.session.userId) {
+    await logActivity(req.session.userId, req.session.email, 'LOGOUT', null, req);
+  }
   req.session.destroy(() => res.redirect('/login'));
 });
 
@@ -129,6 +134,9 @@ router.post('/forgot-password', async (req, res) => {
 
     await pool.query(`UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?`, 
       [token, expiry, user.id]);
+
+    await logActivity(user.id, user.email, 'PASSWORD_RESET', 'Reset requested', req);
+
 
     // 👇 THIS IS THE IMPORTANT PART
     await sendResetEmail(email, token);
@@ -275,6 +283,9 @@ router.post('/profile', isAuthenticated, async (req, res) => {
       userEmail: newEmail, 
       error: null, 
       success: '✅ Email updated successfully!' 
+
+      await logActivity(req.session.userId, req.session.email, 'EMAIL_UPDATED', `Changed to ${newEmail}`, req);
+
     });
 
   } catch (err) {
@@ -344,6 +355,9 @@ router.post('/profile/password', isAuthenticated, async (req, res) => {
       userEmail: req.session.email, 
       error: null, 
       success: '✅ Password updated successfully! You can continue using the app.' 
+
+      await logActivity(req.session.userId, req.session.email, 'PASSWORD_UPDATED', 'Password changed', req);
+
     });
 
   } catch (err) {

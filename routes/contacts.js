@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/database');
 
+const logActivity = require('../helpers/activityLogger');
+
 // --- HELPER: Middleware to protect routes ---
 function isAuthenticated(req, res, next) {
   if (req.session.userId) return next();
@@ -66,6 +68,8 @@ router.post('/contacts/add', isAuthenticated, async (req, res) => {
       VALUES (?, ?, ?, ?, ?)
     `, [name.trim(), email || null, phone || null, company || null, notes || null]);
 
+    await logActivity(req.session.userId, req.session.email, 'CONTACT_CREATED', `Contact "${name}" created`, req);
+
     res.redirect('/contacts');
   } catch (err) {
     console.error(err);
@@ -107,6 +111,9 @@ router.post('/contacts/edit/:id', isAuthenticated, isAdmin, async (req, res) => 
       UPDATE contacts SET name = ?, email = ?, phone = ?, company = ?, notes = ? WHERE id = ?
     `, [name.trim(), email || null, phone || null, company || null, notes || null, id]);
 
+
+    await logActivity(req.session.userId, req.session.email, 'CONTACT_UPDATED', `Contact "${name}" updated`, req);
+
     res.redirect('/contacts');
   } catch (err) {
     console.error(err);
@@ -120,6 +127,9 @@ router.get('/contacts/delete/:id', isAuthenticated, isAdmin, async (req, res) =>
 
   try {
     await pool.query(`DELETE FROM contacts WHERE id = ?`, [id]);
+
+    await logActivity(req.session.userId, req.session.email, 'CONTACT_DELETED', `Contact ID ${id} deleted`, req);
+    
     res.redirect('/contacts');
   } catch (err) {
     console.error(err);
