@@ -5,6 +5,10 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const pool = require('../db/database');
 
+
+const axios = require('axios'); // 👈 Make sure this is at the top of the file
+
+
 // --- HELPER: Middleware to protect routes ---
 function isAuthenticated(req, res, next) {
   if (req.session.userId) return next();
@@ -12,25 +16,43 @@ function isAuthenticated(req, res, next) {
 }
 
 // --- HELPER: Send email via Ethereal (fake SMTP) ---
+// --- HELPER: Send Password Reset Email via Brevo API ---
 async function sendResetEmail(email, token) {
-  let testAccount = await nodemailer.createTestAccount();
-  let transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false,
-    auth: { user: testAccount.user, pass: testAccount.pass },
-  });
+  const resetLink = `https://${process.env.APP_URL || 'localhost:3000'}/reset-password/${token}`;
 
-  let resetLink = `http://localhost:3000/reset-password/${token}`;
-  let info = await transporter.sendMail({
-    from: '"CRM Admin" <noreply@crm.com>',
-    to: email,
-    subject: "Password Reset Request",
-    html: `<h3>Reset your password</h3><a href="${resetLink}">${resetLink}</a><p>Expires in 1 hour.</p>`,
-  });
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: {
+          email: process.env.EMAIL_FROM || 'noreply@crm.com',
+          name: 'CRM Admin'
+        },
+        to: [{ email: email }],
+        subject: "Password Reset Request",
+        htmlContent: `
+          <h3>Password Reset Request</h3>
+          <p>You requested a password reset. Click the link below to set a new password:</p>
+          <p><a href="${resetLink}">${resetLink}</a></p>
+          <p>This link expires in 1 hour.</p>
+          <p>If you didn't request this, please ignore this email.</p>
+        `
+      },
+      {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
+      }
+    );
 
-  console.log("📧 Preview URL: " + nodemailer.getTestMessageUrl(info));
-  return true;
+    console.log("📧 Password reset email sent to:", email);
+    return true;
+  } catch (error) {
+    console.error("❌ Password reset email error:", error.response?.data || error.message);
+    return false;
+  }
 }
 
 // --- ROUTE: Homepage (Redirect to login or dashboard) ---
@@ -103,20 +125,22 @@ router.post('/forgot-password', async (req, res) => {
     }
 
     const token = crypto.randomBytes(32).toString('hex');
-    const expiry = Date.now() + 3600000; // 1 hour
+    const expiry = Date.now() + 3600000;
 
     await pool.query(`UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?`, 
       [token, expiry, user.id]);
 
+    // 👇 THIS IS THE IMPORTANT PART
     await sendResetEmail(email, token);
-    res.render('forgot', { 
-      message: '✅ Reset link sent! Check your terminal console for the preview URL.', 
-      error: null 
+
+    res.render('forgot', {
+      message: '✅ Password reset link sent! Check your email inbox (and spam folder).',
+      error: null
     });
 
   } catch (err) {
     console.error(err);
-    res.render('forgot', { message: null, error: 'Something went wrong.' });
+    res.render('forgot', { message: null, error: 'Something went wrong. Please try again.' });
   }
 });
 
