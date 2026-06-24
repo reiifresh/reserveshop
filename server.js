@@ -9,6 +9,9 @@ const PORT = process.env.PORT || 3000;
 
 const logsRoutes = require('./routes/logs');
 
+
+app.set('trust proxy', true);
+
 // Middleware to read form data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
