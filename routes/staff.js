@@ -7,6 +7,8 @@ const pool = require('../db/database');
 
 const axios = require('axios'); // 👈 Add this at the top of the file
 
+const logActivity = require('../helpers/activityLogger');
+
 // --- HELPER: Admin Only Middleware ---
 function isAdmin(req, res, next) {
   if (req.session.userId && req.session.role === 'admin') {
@@ -109,7 +111,15 @@ router.post('/staff/add', isAdmin, async (req, res) => {
     await pool.query(`INSERT INTO users (email, password, role, full_name) VALUES (?, ?, ?, ?)`, 
       [email.trim(), hashedPassword, 'staff', fullName.trim()]);
 
-    await logActivity(req.session.userId, req.session.email, 'STAFF_CREATED', `Staff "${email}" created`, req);
+    // 👇 WRAP THIS IN A TRY/CATCH TO CATCH SPECIFIC ERRORS
+    try {
+      await logActivity(req.session.userId, req.session.email, 'STAFF_CREATED', `Staff "${email}" created`, req);
+      console.log("✅ Activity logged for staff creation");
+    } catch (logErr) {
+      console.error("❌ Failed to log activity:", logErr.message);
+      // Don't stop the process — just log the error and continue
+    }
+
 
     // 4. Send the welcome email with the temp password
     await sendWelcomeEmail(email.trim(), tempPassword);
@@ -122,7 +132,11 @@ router.post('/staff/add', isAdmin, async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.render('staff/add', { error: 'Database error. Try again.', success: null, userEmail: req.session.email });
+    res.render('staff/add', { 
+      error: 'Database error. Try again.' + err.message, 
+      success: null, 
+      userEmail: req.session.email });
+
   }
 });
 
@@ -139,7 +153,7 @@ router.get('/staff/delete/:id', isAdmin, async (req, res) => {
     await pool.query(`DELETE FROM users WHERE id = ?`, [id]);
 
     await logActivity(req.session.userId, req.session.email, 'STAFF_DELETED', `Staff ID ${id} deleted`, req);
-    
+
     res.redirect('/staff');
   } catch (err) {
     console.error(err);
