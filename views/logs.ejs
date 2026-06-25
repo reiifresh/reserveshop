@@ -1,20 +1,69 @@
-
-<%
-  // Helper: Convert country code to flag emoji
-  function getFlagEmoji(countryCode) {
-    if (!countryCode) return '';
-    const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-  }
-%>
-
 <%- include('partials/header') %>
 
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
   <h2><i class="fas fa-history text-primary me-2"></i>Activity Log</h2>
-  <span class="text-muted">Last 100 actions</span>
+  <span class="text-muted">Last 200 actions</span>
 </div>
 
+<!-- 🔍 FILTER SECTION -->
+<div class="card card-shadow mb-4">
+  <div class="card-body">
+    <h6 class="mb-3"><i class="fas fa-filter me-2"></i>Filter Activity</h6>
+    <form method="GET" action="/logs" class="row g-2 align-items-end">
+      <!-- Filter by User -->
+      <div class="col-md-3">
+        <label class="form-label small">User</label>
+        <select name="user" class="form-select form-select-sm">
+          <option value="">All Users</option>
+          <% users.forEach(u => { %>
+            <option value="<%= u.user_email %>" <%= filterUser === u.user_email ? 'selected' : '' %>>
+              <%= u.user_email %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Filter by Action -->
+      <div class="col-md-3">
+        <label class="form-label small">Action</label>
+        <select name="action" class="form-select form-select-sm">
+          <option value="ALL">All Actions</option>
+          <% actions.forEach(a => { %>
+            <option value="<%= a.action %>" <%= filterAction === a.action ? 'selected' : '' %>>
+              <%= a.action %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Filter by Days -->
+      <div class="col-md-2">
+        <label class="form-label small">Last</label>
+        <select name="days" class="form-select form-select-sm">
+          <option value="">All Time</option>
+          <option value="1" <%= filterDays == '1' ? 'selected' : '' %>>1 Day</option>
+          <option value="7" <%= filterDays == '7' ? 'selected' : '' %>>7 Days</option>
+          <option value="30" <%= filterDays == '30' ? 'selected' : '' %>>30 Days</option>
+          <option value="90" <%= filterDays == '90' ? 'selected' : '' %>>90 Days</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary btn-sm w-100">
+          <i class="fas fa-search me-1"></i>Apply Filters
+        </button>
+      </div>
+      <div class="col-md-2">
+        <a href="/logs" class="btn btn-outline-secondary btn-sm w-100">
+          <i class="fas fa-undo me-1"></i>Reset
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 📊 LOG TABLE -->
 <div class="table-responsive">
   <table class="table table-striped table-hover shadow-sm bg-white rounded">
     <thead class="table-dark">
@@ -23,27 +72,32 @@
         <th>User</th>
         <th>Action</th>
         <th>Details</th>
-        <th>IP</th>
-        <th>Location</th>  <!-- 👈 ADD THIS COLUMN -->
+        <th>Location</th>
       </tr>
     </thead>
     <tbody>
-      <% logs.forEach(log => { %>
+      <% if (logs.length === 0) { %>
         <tr>
-          <td><%= new Date(log.created_at).toLocaleString() %></td>
-          <td><%= log.user_email || 'Unknown' %></td>
-          <td>
-            <span class="badge 
-              <%= log.action.includes('LOGIN') ? 'bg-success' : 
-                  log.action.includes('LOGOUT') ? 'bg-secondary' :
-                  log.action.includes('DELETED') ? 'bg-danger' :
-                  log.action.includes('CREATED') ? 'bg-primary' :
-                  log.action.includes('UPDATED') ? 'bg-warning' : 'bg-info' %>">
-              <%= log.action %>
-            </span>
+          <td colspan="5" class="text-center text-muted py-4">
+            <i class="fas fa-inbox me-2"></i>No logs found matching your filters.
           </td>
-          <td><%= log.details || '-' %></td>
-          <td><code><%= log.ip_address || '-' %></code></td>
+        </tr>
+      <% } else { %>
+        <% logs.forEach(log => { %>
+          <tr>
+            <td><%= new Date(log.created_at).toLocaleString() %></td>
+            <td><%= log.user_email || 'Unknown' %></td>
+            <td>
+              <span class="badge 
+                <%= log.action.includes('LOGIN') ? 'bg-success' : 
+                    log.action.includes('LOGOUT') ? 'bg-secondary' :
+                    log.action.includes('DELETED') ? 'bg-danger' :
+                    log.action.includes('CREATED') ? 'bg-primary' :
+                    log.action.includes('UPDATED') ? 'bg-warning' : 'bg-info' %>">
+                <%= log.action %>
+              </span>
+            </td>
+            <td><%= log.details || '-' %></td>
             <td>
               <% if (log.country_code) { %>
                 <span class="fs-5"><%= getFlagEmoji(log.country_code) %></span>
@@ -51,10 +105,26 @@
                 <span class="text-muted">-</span>
               <% } %>
             </td>
-        </tr>
-      <% }) %>
+          </tr>
+        <% }) %>
+      <% } %>
     </tbody>
   </table>
 </div>
 
+<% if (logs.length > 0) { %>
+  <div class="text-muted small mt-2">
+    Showing <%= logs.length %> log entries
+  </div>
+<% } %>
+
 <%- include('partials/footer') %>
+
+<% 
+  // Helper: Convert country code to flag emoji
+  function getFlagEmoji(countryCode) {
+    if (!countryCode) return '';
+    const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  }
+%>
