@@ -8,6 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const logsRoutes = require('./routes/logs');
+const pool = require('./db/database'); // 👈 MAKE SURE THIS EXISTS
 
 
 app.set('trust proxy', true);
@@ -50,6 +51,31 @@ app.use('/', authRoutes);
 app.use('/', contactRoutes);
 app.use('/', staffRoutes);
 app.use('/', logsRoutes);
+
+// ─── CLEANUP LOGS ENDPOINT (For cron-job.org) ───
+app.get('/api/clean-logs', async (req, res) => {
+  const secret = process.env.CLEANUP_SECRET || 'your-super-secret-key';
+  
+  // 👇 Check the secret key to prevent unauthorized access
+  if (req.query.secret !== secret) {
+    return res.status(401).send('🔒 Unauthorized');
+  }
+
+  try {
+    const RETENTION_DAYS = process.env.LOG_RETENTION_DAYS || 30;
+    const [result] = await pool.query(
+      `DELETE FROM activity_logs 
+       WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)`,
+      [RETENTION_DAYS]
+    );
+    res.send(`✅ Deleted ${result.affectedRows} old log entries.`);
+  } catch (err) {
+    console.error("❌ Cleanup error:", err);
+    res.status(500).send('❌ Cleanup failed: ' + err.message);
+  }
+});
+
+
 
 // Start the server
 app.listen(PORT, () => {
