@@ -64,4 +64,62 @@ router.get('/logs', isAdmin, async (req, res) => {
   }
 });
 
+
+// ─── EXPORT LOGS TO CSV ───
+router.get('/logs/export', isAdmin, async (req, res) => {
+  try {
+    // Get filter parameters from URL (same as the logs page)
+    const { user, action, days } = req.query;
+
+    let sqlQuery = `
+      SELECT user_email, action, details, ip_address, country_code, created_at 
+      FROM activity_logs 
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (user && user.trim() !== '') {
+      sqlQuery += ` AND user_email = ?`;
+      params.push(user.trim());
+    }
+
+    if (action && action !== 'ALL') {
+      sqlQuery += ` AND action = ?`;
+      params.push(action);
+    }
+
+    if (days && !isNaN(days) && days > 0) {
+      sqlQuery += ` AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)`;
+      params.push(parseInt(days));
+    }
+
+    sqlQuery += ` ORDER BY created_at DESC`;
+
+    const [logs] = await pool.query(sqlQuery, params);
+
+    // Build CSV content
+    let csv = 'User,Action,Details,IP,Country,Timestamp\n';
+
+    logs.forEach(log => {
+      const userEmail = log.user_email || 'Unknown';
+      const action = log.action || '';
+      const details = (log.details || '').replace(/,/g, ';'); // Remove commas to avoid CSV issues
+      const ip = log.ip_address || '';
+      const country = log.country_code || '';
+      const timestamp = log.created_at ? new Date(log.created_at).toLocaleString() : '';
+
+      csv += `"${userEmail}","${action}","${details}","${ip}","${country}","${timestamp}"\n`;
+    });
+
+    // Set headers for CSV download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=activity_log_${new Date().toISOString().slice(0,10)}.csv`);
+    res.send(csv);
+
+  } catch (err) {
+    console.error("❌ Export error:", err);
+    res.status(500).send('❌ Failed to export logs.');
+  }
+});
+
 module.exports = router;
