@@ -1,3 +1,13 @@
+
+<%
+  // Helper: Convert country code to flag emoji
+  function getFlagEmoji(countryCode) {
+    if (!countryCode) return '';
+    const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  }
+%>
+
 <%- include('partials/header') %>
 
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
@@ -13,6 +23,8 @@
         <th>User</th>
         <th>Action</th>
         <th>Details</th>
+        <th>IP</th>
+        <th>Location</th>  <!-- 👈 ADD THIS COLUMN -->
       </tr>
     </thead>
     <tbody>
@@ -31,6 +43,14 @@
             </span>
           </td>
           <td><%= log.details || '-' %></td>
+          <td><code><%= log.ip_address || '-' %></code></td>
+            <td>
+              <% if (log.country_code) { %>
+                <span class="fs-5"><%= getFlagEmoji(log.country_code) %></span>
+              <% } else { %>
+                <span class="text-muted">-</span>
+              <% } %>
+            </td>
         </tr>
       <% }) %>
     </tbody>
