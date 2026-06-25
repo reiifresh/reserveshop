@@ -1,55 +1,127 @@
 <%- include('partials/header') %>
 
-<div class="row mt-5">
-  <div class="col-md-8 mx-auto">
-    <div class="card card-shadow">
-      <div class="card-body p-5">
-        <div class="d-flex align-items-center mb-4">
-          <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-            <i class="fas fa-user-tie fa-2x text-primary"></i>
-          </div>
-          <div>
-            <h1 class="h3 mb-0">Welcome back, <%= user.fullName || 'Admin' %>!</h1>
-            <p class="text-muted small">Logged in as <strong><%= userEmail %></strong></p>
-          </div>
-        </div>
-        
-        <div class="alert alert-success" role="alert">
-          <i class="fas fa-check-circle me-2"></i> Your MySQL database is connected and running smoothly.
-        </div>
+<!-- Welcome Section -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="d-flex align-items-center mb-4">
+      <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+        <i class="fas fa-user-tie fa-2x text-primary"></i>
+      </div>
+      <div>
+        <h1 class="h3 mb-0">Welcome back, <%= user.fullName || 'Admin' %>!</h1>
+        <p class="text-muted small">Logged in as <strong><%= userEmail %></strong></p>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <div class="row g-3 mt-3">
-          <div class="col-md-6">
-            <div class="card bg-light">
-              <div class="card-body text-center">
-                <i class="fas fa-users fa-2x text-primary mb-2"></i>
-                <h5 class="card-title">Contacts</h5>
-                <p class="card-text small text-muted">Manage your leads and clients.</p>
-                <a href="#" class="btn btn-outline-primary btn-sm">Coming Soon</a>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card bg-light">
-              <div class="card-body text-center">
-                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
-                <h5 class="card-title">Analytics</h5>
-                <p class="card-text small text-muted">Track your sales performance.</p>
-                <a href="#" class="btn btn-outline-success btn-sm">Coming Soon</a>
-              </div>
-            </div>
-          </div>
-        </div>
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+  <!-- Total Contacts -->
+  <div class="col-md-4">
+    <div class="card card-shadow h-100 border-0">
+      <div class="card-body text-center py-4">
+        <i class="fas fa-address-book fa-2x text-primary mb-2"></i>
+        <h5 class="card-title mb-0"><%= totalContacts %></h5>
+        <p class="card-text text-muted small">Total Contacts</p>
+        <a href="/contacts" class="btn btn-outline-primary btn-sm mt-2">
+          <i class="fas fa-arrow-right me-1"></i>View All
+        </a>
+      </div>
+    </div>
+  </div>
 
-        <hr class="my-4">
-        <div class="text-center">
-          <a href="/logout" class="btn btn-outline-danger">
-            <i class="fas fa-sign-out-alt me-2"></i>Logout
-          </a>
-        </div>
+  <!-- Total Staff -->
+  <div class="col-md-4">
+    <div class="card card-shadow h-100 border-0">
+      <div class="card-body text-center py-4">
+        <i class="fas fa-users fa-2x text-success mb-2"></i>
+        <h5 class="card-title mb-0"><%= totalStaff %></h5>
+        <p class="card-text text-muted small">Staff Members</p>
+        <a href="/staff" class="btn btn-outline-success btn-sm mt-2">
+          <i class="fas fa-arrow-right me-1"></i>View All
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Action / Add Contact -->
+  <div class="col-md-4">
+    <div class="card card-shadow h-100 border-0">
+      <div class="card-body text-center py-4">
+        <i class="fas fa-plus-circle fa-2x text-warning mb-2"></i>
+        <h5 class="card-title mb-0">Quick Action</h5>
+        <p class="card-text text-muted small">Add a new contact</p>
+        <a href="/contacts/add" class="btn btn-outline-warning btn-sm mt-2">
+          <i class="fas fa-plus me-1"></i>Add Contact
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity Section -->
+<div class="row">
+  <div class="col-12">
+    <div class="card card-shadow border-0">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <h5 class="mb-0">
+          <i class="fas fa-clock text-primary me-2"></i>Recent Activity
+          <span class="badge bg-secondary ms-2"><%= recentActivity.length %></span>
+        </h5>
+      </div>
+      <div class="card-body pt-0">
+        <% if (recentActivity.length === 0) { %>
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+            <p class="mb-0">No recent activity to show.</p>
+          </div>
+        <% } else { %>
+          <div class="list-group list-group-flush">
+            <% recentActivity.forEach(log => { %>
+              <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="badge 
+                    <%= log.action.includes('LOGIN') ? 'bg-success' : 
+                        log.action.includes('LOGOUT') ? 'bg-secondary' :
+                        log.action.includes('DELETED') ? 'bg-danger' :
+                        log.action.includes('CREATED') ? 'bg-primary' :
+                        log.action.includes('UPDATED') ? 'bg-warning' : 'bg-info' %> 
+                    me-2">
+                    <%= log.action %>
+                  </span>
+                  <span class="small">
+                    <strong><%= log.user_email || 'Unknown' %></strong>
+                    <%= log.details ? '— ' + log.details : '' %>
+                  </span>
+                </div>
+                <div class="text-muted small">
+                  <% if (log.country_code) { %>
+                    <span class="me-2"><%= getFlagEmoji(log.country_code) %></span>
+                  <% } %>
+                  <%= new Date(log.created_at).toLocaleString() %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+          <div class="text-end mt-3">
+            <a href="/logs" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-history me-1"></i>View Full Activity Log
+            </a>
+          </div>
+        <% } %>
       </div>
     </div>
   </div>
 </div>
 
 <%- include('partials/footer') %>
+
+<% 
+  // Helper: Convert country code to flag emoji
+  function getFlagEmoji(countryCode) {
+    if (!countryCode) return '';
+    const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  }
+%>

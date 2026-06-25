@@ -100,9 +100,42 @@ router.post('/login', async (req, res) => {
 });
 
 // --- ROUTE: Dashboard (Protected) ---
-router.get('/dashboard', isAuthenticated, (req, res) => {
-  res.render('dashboard', { userEmail: req.session.email || 'Admin' });
+router.get('/dashboard', isAuthenticated, async (req, res) => {
+  try {
+    // Get total contacts count
+    const [contactCount] = await pool.query(`SELECT COUNT(*) as count FROM contacts`);
+    const totalContacts = contactCount[0].count;
+
+    // Get total staff count (excluding the logged-in admin)
+    const [staffCount] = await pool.query(`SELECT COUNT(*) as count FROM users WHERE id != ?`, [req.session.userId]);
+    const totalStaff = staffCount[0].count;
+
+    // Get recent activity (last 5 actions)
+    const [recentActivity] = await pool.query(`
+      SELECT * FROM activity_logs 
+      ORDER BY created_at DESC 
+      LIMIT 5
+    `);
+
+    res.render('dashboard', {
+      userEmail: req.session.email,
+      totalContacts: totalContacts,
+      totalStaff: totalStaff,
+      recentActivity: recentActivity,
+      user: req.session // 👈 So the navbar works
+    });
+  } catch (err) {
+    console.error("❌ Dashboard error:", err);
+    res.render('dashboard', {
+      userEmail: req.session.email,
+      totalContacts: 0,
+      totalStaff: 0,
+      recentActivity: [],
+      user: req.session
+    });
+  }
 });
+
 
 // --- ROUTE: Logout ---
 router.get('/logout', async (req, res) => {
