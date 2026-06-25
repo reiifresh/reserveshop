@@ -61,6 +61,8 @@
 </div>
 
 <!-- Recent Activity Section -->
+
+<% if (user && user.role === 'admin') { %>
 <div class="row">
   <div class="col-12">
     <div class="card card-shadow border-0">
@@ -104,16 +106,21 @@
               </div>
             <% }) %>
           </div>
+
+          <% if (user && user.role === 'admin') { %>
           <div class="text-end mt-3">
             <a href="/logs" class="btn btn-sm btn-outline-primary">
               <i class="fas fa-history me-1"></i>View Full Activity Log
             </a>
           </div>
+          <% } %>
+
         <% } %>
       </div>
     </div>
   </div>
 </div>
+<% } %>
 
 <%- include('partials/footer') %>
 
