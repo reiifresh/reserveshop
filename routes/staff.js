@@ -14,7 +14,10 @@ function isAdmin(req, res, next) {
   if (req.session.userId && req.session.role === 'admin') {
     return next();
   }
-  res.status(403).send("❌ Access Denied. Admins only.");
+  res.status(403).render('error', {
+    message: 'You do not have admin privileges to access this page.',
+    user: req.session
+  });
 }
 
 // --- HELPER: Send Welcome Email with Temporary Password ---
@@ -147,9 +150,12 @@ router.get('/staff/delete/:id', isAdmin, async (req, res) => {
   try {
     // Prevent admin from deleting themselves
     if (parseInt(id) === req.session.userId) {
-      return res.send("❌ You cannot delete your own account.");
+      return res.status(403).render('error', {
+        message: 'You cannot delete your own account.',
+        user: req.session
+      });
     }
-
+    
     await pool.query(`DELETE FROM users WHERE id = ?`, [id]);
 
     await logActivity(req.session.userId, req.session.email, 'STAFF_DELETED', `Staff ID ${id} deleted`, req);

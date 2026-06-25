@@ -14,7 +14,10 @@ function isAdmin(req, res, next) {
   if (req.session.role === 'admin') {
     return next();
   }
-  res.status(403).send("❌ Access Denied. Only admins can edit or delete contacts.");
+  res.status(403).render('error', {
+    message: 'You do not have admin privileges to perform this action.',
+    user: req.session
+  });
 }
 
 // --- ROUTE: List all Contacts (WITH SEARCH) ---

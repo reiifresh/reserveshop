@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+
+<div class="auth-wrapper">
+  <div class="col-md-6">
+    <div class="card card-shadow border-0">
+      <div class="card-body p-5 text-center">
+        <div class="mb-4">
+          <i class="fas fa-lock fa-3x text-danger"></i>
+        </div>
+        <h4 class="mb-3">Access Denied</h4>
+        <p class="text-muted"><%= message || 'You do not have permission to view this page. Only Admins sorry.' %></p>
+        <a href="/dashboard" class="btn btn-primary mt-3">
+          <i class="fas fa-arrow-left me-2"></i>Return to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
