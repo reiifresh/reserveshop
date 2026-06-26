@@ -10,6 +10,8 @@ const PORT = process.env.PORT || 3000;
 const logsRoutes = require('./routes/logs');
 const pool = require('./db/database'); // 👈 MAKE SURE THIS EXISTS
 
+const attendanceRoutes = require('./routes/attendance');
+
 
 app.set('trust proxy', true);
 
@@ -51,6 +53,8 @@ app.use('/', authRoutes);
 app.use('/', contactRoutes);
 app.use('/', staffRoutes);
 app.use('/', logsRoutes);
+
+app.use('/', attendanceRoutes);
 
 // ─── CLEANUP LOGS ENDPOINT (For cron-job.org) ───
 app.get('/api/clean-logs', async (req, res) => {
