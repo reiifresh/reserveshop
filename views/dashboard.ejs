@@ -129,50 +129,51 @@
       </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="card card-shadow border-0">
-      <div class="card-header bg-transparent border-0 pt-3">
-        <h5 class="mb-0">
-          <i class="fas fa-history text-primary me-2"></i>Recent Activity
-        </h5>
-      </div>
-      <div class="card-body">
-        <% if (recentActivity.length === 0) { %>
-          <p class="text-muted">No recent activity.</p>
-        <% } else { %>
-          <div class="list-group list-group-flush">
-            <% recentActivity.forEach(log => { %>
-              <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                <div>
-                  <span class="badge 
-                    <%= log.action.includes('LOGIN') ? 'bg-success' : 
-                        log.action.includes('LOGOUT') ? 'bg-secondary' :
-                        log.action.includes('DELETED') ? 'bg-danger' :
-                        log.action.includes('CREATED') ? 'bg-primary' :
-                        log.action.includes('UPDATED') ? 'bg-warning' : 'bg-info' %> 
-                    me-2">
-                    <%= log.action %>
-                  </span>
-                  <span class="small">
-                    <strong><%= log.user_email || 'Unknown' %></strong>
-                    <%= log.details ? '— ' + log.details : '' %>
-                  </span>
+    <!-- Recent Activity (Admin Only) -->
+    <% if (isAdmin) { %>
+      <div class="card card-shadow border-0">
+        <div class="card-header bg-transparent border-0 pt-3">
+          <h5 class="mb-0">
+            <i class="fas fa-history text-primary me-2"></i>Recent Activity
+          </h5>
+        </div>
+        <div class="card-body">
+          <% if (recentActivity.length === 0) { %>
+            <p class="text-muted">No recent activity.</p>
+          <% } else { %>
+            <div class="list-group list-group-flush">
+              <% recentActivity.forEach(log => { %>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="badge 
+                      <%= log.action.includes('LOGIN') ? 'bg-success' : 
+                          log.action.includes('LOGOUT') ? 'bg-secondary' :
+                          log.action.includes('DELETED') ? 'bg-danger' :
+                          log.action.includes('CREATED') ? 'bg-primary' :
+                          log.action.includes('UPDATED') ? 'bg-warning' : 'bg-info' %> 
+                      me-2">
+                      <%= log.action %>
+                    </span>
+                    <span class="small">
+                      <strong><%= log.user_email || 'Unknown' %></strong>
+                      <%= log.details ? '— ' + log.details : '' %>
+                    </span>
+                  </div>
+                  <div class="text-muted small">
+                    <%= new Date(log.created_at).toLocaleString() %>
+                  </div>
                 </div>
-                <div class="text-muted small">
-                  <%= new Date(log.created_at).toLocaleString() %>
-                </div>
-              </div>
-            <% }) %>
+              <% }) %>
+            </div>
+          <% } %>
+          <div class="text-end mt-3">
+            <a href="/logs" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-history me-1"></i>View Full Log
+            </a>
           </div>
-        <% } %>
-        <div class="text-end mt-3">
-          <a href="/logs" class="btn btn-sm btn-outline-primary">
-            <i class="fas fa-history me-1"></i>View Full Log
-          </a>
         </div>
       </div>
-    </div>
-  </div>
+    <% } %>
 
   <!-- Right Column -->
   <div class="col-lg-4">
