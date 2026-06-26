@@ -35,12 +35,18 @@
               <i class="fas fa-sign-out-alt me-2"></i>Clock Out
             </button>
           </form>
-        <% } else if (today && today.check_in && today.check_out) { %>
+       <% } else if (today && today.check_in && today.check_out) { %>
           <div class="alert alert-secondary">
             <i class="fas fa-check-circle me-2"></i> You clocked out at <strong><%= today.check_out %></strong>
             <br><small>Hours worked: <%= today.hours_worked || 'N/A' %></small>
           </div>
-          <button class="btn btn-secondary btn-lg w-100" disabled>
+          <!-- 👇 YOUR UNDO BUTTON HERE 👇 -->
+          <form method="POST" action="/attendance/undo" class="mt-2">
+            <button type="submit" class="btn btn-warning btn-sm w-100">
+              <i class="fas fa-undo me-2"></i>Undo Clock-Out (within 5 mins)
+            </button>
+          </form>
+          <button class="btn btn-secondary btn-lg w-100 mt-2" disabled>
             <i class="fas fa-check me-2"></i>Done for Today
           </button>
         <% } else { %>

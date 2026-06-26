@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <h2><i class="fas fa-user-edit text-primary me-2"></i>Manage Attendance</h2>
+    <hr>
+  </div>
+</div>
+
+<% if (message) { %>
+  <div class="alert alert-info"><%= message %></div>
+<% } %>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover shadow-sm bg-white rounded">
+    <thead class="table-dark">
+      <tr>
+        <th>Date</th>
+        <th>Staff</th>
+        <th>Check In</th>
+        <th>Check Out</th>
+        <th>Hours</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% records.forEach(record => { %>
+        <tr>
+          <form method="POST" action="/attendance/admin/update/<%= record.id %>">
+            <td><%= new Date(record.date).toLocaleDateString() %></td>
+            <td><%= record.full_name || record.email %></td>
+            <td>
+              <input type="time" name="check_in" value="<%= record.check_in || '' %>" class="form-control form-control-sm" style="width:120px;">
+            </td>
+            <td>
+              <input type="time" name="check_out" value="<%= record.check_out || '' %>" class="form-control form-control-sm" style="width:120px;">
+            </td>
+            <td>
+              <input type="number" step="0.5" name="hours_worked" value="<%= record.hours_worked || '' %>" class="form-control form-control-sm" style="width:80px;">
+            </td>
+            <td>
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-save me-1"></i>Update
+              </button>
+            </td>
+          </form>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
