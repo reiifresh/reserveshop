@@ -38,6 +38,8 @@ router.get('/attendance', isAuthenticated, async (req, res) => {
           AND a.check_out IS NULL
           AND u.deleted_at IS NULL
       `);
+      clockedInStaff = staff;
+    } // 👈 THIS CLOSING BRACE WAS MISSING!
 
     // 👇 Get the message from session, then clear it
     const message = req.session.message || null;
@@ -50,7 +52,7 @@ router.get('/attendance', isAuthenticated, async (req, res) => {
       isAdmin: isAdmin,
       userEmail: req.session.email,
       user: req.session,
-      message: message  // 👈 PASS THE MESSAGE
+      message: message
     });
 
   } catch (err) {
@@ -58,6 +60,7 @@ router.get('/attendance', isAuthenticated, async (req, res) => {
     res.send("Error loading attendance page.");
   }
 });
+
 
 // --- ROUTE: Check In ---
 router.post('/attendance/check-in', isAuthenticated, async (req, res) => {
