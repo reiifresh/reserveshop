@@ -10,6 +10,7 @@ const axios = require('axios'); // 👈 Add this at the top of the file
 
 const logActivity = require('../helpers/activityLogger');
 
+
 // --- HELPER: Admin Only Middleware ---
 
 
@@ -61,8 +62,12 @@ async function sendWelcomeEmail(email, tempPassword, role = 'staff') {
 // ─── ADMIN/HR: View Staff List (Read-only) ───
 router.get('/staff', isHR, async (req, res) => {
   try {
-    const [rows] = await pool.query(`SELECT id, email, full_name, role, created_at FROM users WHERE id != ?`, [req.session.userId]);
-    res.render('staff/index', { staff: rows, userEmail: req.session.email, user: req.session });
+    const [rows] = await pool.query(
+      `SELECT id, email, full_name, role, created_at 
+       FROM users 
+       WHERE id != ? AND deleted_at IS NULL`,
+      [req.session.userId]
+    );
   } catch (err) {
     console.error(err);
     res.send("Error loading staff.");
@@ -132,27 +137,69 @@ router.post('/staff/add', isAdmin, async (req, res) => {
   }
 });
 
-// --- ROUTE: Delete Staff (Admin Only) ---
+// ─── ADMIN: Soft Delete Staff ───
 router.get('/staff/delete/:id', isAdmin, async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Prevent admin from deleting themselves
     if (parseInt(id) === req.session.userId) {
-      return res.status(403).render('error', {
-        message: 'You cannot delete your own account.',
-        user: req.session
-      });
+      return res.send("❌ You cannot delete your own account.");
     }
-    
-    await pool.query(`DELETE FROM users WHERE id = ?`, [id]);
 
-    await logActivity(req.session.userId, req.session.email, 'STAFF_DELETED', `Staff ID ${id} deleted`, req);
+    // 👇 Soft delete instead of hard delete
+    await pool.query(`UPDATE users SET deleted_at = NOW() WHERE id = ?`, [id]);
+
+    // Log the activity
+    await logActivity(req.session.userId, req.session.email, 'STAFF_DELETED', `Staff ID ${id} soft deleted`, req);
 
     res.redirect('/staff');
   } catch (err) {
     console.error(err);
     res.redirect('/staff');
+  }
+});
+
+// ─── ADMIN: View Archived Staff ───
+router.get('/staff/archived', isAdmin, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT id, email, full_name, role, created_at, deleted_at 
+       FROM users 
+       WHERE deleted_at IS NOT NULL 
+       ORDER BY deleted_at DESC`
+    );
+    res.render('staff/archived', { 
+      staff: rows, 
+      userEmail: req.session.email,
+      user: req.session
+    });
+  } catch (err) {
+    console.error("❌ Archived error:", err);
+    res.send("Error loading archived staff.");
+  }
+});
+
+// ─── ADMIN: Restore Staff ───
+router.post('/staff/restore/:id', isAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await pool.query(`UPDATE users SET deleted_at = NULL WHERE id = ?`, [id]);
+
+    await logActivity(
+      req.session.userId,
+      req.session.email,
+      'STAFF_RESTORED',
+      `Staff ID ${id} restored from archive`,
+      req
+    );
+
+    req.session.message = '✅ Staff member restored successfully!';
+    res.redirect('/staff/archived');
+  } catch (err) {
+    console.error("❌ Restore error:", err);
+    req.session.message = '❌ Failed to restore staff.';
+    res.redirect('/staff/archived');
   }
 });
 

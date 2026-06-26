@@ -31,13 +31,13 @@ router.get('/attendance', isAuthenticated, async (req, res) => {
     let clockedInStaff = [];
     if (isAdmin) {
       const [staff] = await pool.query(`
-        SELECT u.id, u.email, u.full_name, a.check_in, a.date 
+        SELECT u.id, u.email, u.full_name, a.check_in 
         FROM attendance a
         JOIN users u ON a.staff_id = u.id
-        WHERE a.date = CURDATE() AND a.check_out IS NULL
+        WHERE a.date = CURDATE() 
+          AND a.check_out IS NULL
+          AND u.deleted_at IS NULL
       `);
-      clockedInStaff = staff;
-    }
 
     // 👇 Get the message from session, then clear it
     const message = req.session.message || null;
