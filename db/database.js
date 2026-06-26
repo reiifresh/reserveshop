@@ -11,7 +11,10 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
+  timezone: '+08:00'  // 👈 THIS CONVERTS ALL TIMES TO PHILIPPINE TIME
 });
+
+
 
 // Function to initialize the users table
 async function initDB() {
