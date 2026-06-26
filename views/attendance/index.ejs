@@ -7,13 +7,13 @@
   </div>
 </div>
 
+
 <!-- Flash Messages -->
-<% if (req.session && req.session.message) { %>
+<% if (message) { %>
   <div class="alert alert-info alert-dismissible fade show" role="alert">
-    <%= req.session.message %>
+    <%= message %>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
-  <% req.session.message = null; %>
 <% } %>
 
 <!-- Staff Actions -->
