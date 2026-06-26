@@ -3,12 +3,7 @@ const router = express.Router();
 const pool = require('../db/database');
 const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
-// --- HELPER: Check if user is logged in ---
-
-// --- HELPER: Check if user is admin ---
-
-
-// --- ROUTE: Staff Dashboard (Attendance View) ---
+// ─── STAFF: View Attendance ───
 router.get('/attendance', isAuthenticated, async (req, res) => {
   try {
     const staffId = req.session.userId;
@@ -31,17 +26,14 @@ router.get('/attendance', isAuthenticated, async (req, res) => {
     let clockedInStaff = [];
     if (isAdmin) {
       const [staff] = await pool.query(`
-        SELECT u.id, u.email, u.full_name, a.check_in 
+        SELECT u.id, u.email, u.full_name, a.check_in, a.date 
         FROM attendance a
         JOIN users u ON a.staff_id = u.id
-        WHERE a.date = CURDATE() 
-          AND a.check_out IS NULL
-          AND u.deleted_at IS NULL
+        WHERE a.date = CURDATE() AND a.check_out IS NULL AND u.deleted_at IS NULL
       `);
       clockedInStaff = staff;
-    } // 👈 THIS CLOSING BRACE WAS MISSING!
+    }
 
-    // 👇 Get the message from session, then clear it
     const message = req.session.message || null;
     req.session.message = null;
 
@@ -54,15 +46,13 @@ router.get('/attendance', isAuthenticated, async (req, res) => {
       user: req.session,
       message: message
     });
-
   } catch (err) {
     console.error("❌ Attendance error:", err);
     res.send("Error loading attendance page.");
   }
 });
 
-
-// --- ROUTE: Check In ---
+// ─── STAFF: Check In ───
 router.post('/attendance/check-in', isAuthenticated, async (req, res) => {
   try {
     const staffId = req.session.userId;
@@ -92,7 +82,7 @@ router.post('/attendance/check-in', isAuthenticated, async (req, res) => {
   }
 });
 
-// --- ROUTE: Check Out ---
+// ─── STAFF: Check Out ───
 router.post('/attendance/check-out', isAuthenticated, async (req, res) => {
   try {
     const staffId = req.session.userId;
@@ -124,13 +114,11 @@ router.post('/attendance/check-out', isAuthenticated, async (req, res) => {
   }
 });
 
-
-// ─── STAFF: Undo Clock-Out (within 5 minutes) ───
+// ─── STAFF: Undo Clock-Out ───
 router.post('/attendance/undo', isAuthenticated, async (req, res) => {
   try {
     const staffId = req.session.userId;
 
-    // Get today's record (must have check_out set)
     const [record] = await pool.query(
       `SELECT id, check_out, created_at FROM attendance 
        WHERE staff_id = ? AND date = CURDATE() AND check_out IS NOT NULL
@@ -152,7 +140,6 @@ router.post('/attendance/undo', isAuthenticated, async (req, res) => {
       return res.redirect('/attendance');
     }
 
-    // Remove check_out and hours_worked
     await pool.query(
       `UPDATE attendance 
        SET check_out = NULL, hours_worked = NULL 
@@ -169,14 +156,14 @@ router.post('/attendance/undo', isAuthenticated, async (req, res) => {
   }
 });
 
-
-// ─── ADMIN: View All Attendance Records ───
+// ─── ADMIN/HR: Manage Attendance ───
 router.get('/attendance/admin', isHR, async (req, res) => {
   try {
     const [records] = await pool.query(`
       SELECT a.*, u.email, u.full_name 
       FROM attendance a
       JOIN users u ON a.staff_id = u.id
+      WHERE u.deleted_at IS NULL
       ORDER BY a.date DESC, a.created_at DESC
       LIMIT 100
     `);
@@ -194,7 +181,7 @@ router.get('/attendance/admin', isHR, async (req, res) => {
   }
 });
 
-// ─── ADMIN: Update Attendance Record ───
+// ─── ADMIN/HR: Update Attendance Record ───
 router.post('/attendance/admin/update/:id', isHR, async (req, res) => {
   try {
     const { id } = req.params;
