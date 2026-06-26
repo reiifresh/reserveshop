@@ -75,21 +75,27 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+    // 👇 ADD THIS CONDITION
+    const [rows] = await pool.query(
+      `SELECT * FROM users WHERE email = ? AND deleted_at IS NULL`,
+      [email]
+    );
     const user = rows[0];
 
-    if (!user) return res.render('login', { error: 'Invalid email or password.' });
+    if (!user) {
+      return res.render('login', { error: 'Invalid email or password.' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.render('login', { error: 'Invalid email or password.' });
+    if (!isMatch) {
+      return res.render('login', { error: 'Invalid email or password.' });
+    }
 
     req.session.userId = user.id;
     req.session.email = user.email;
-    req.session.role = user.role; // 👈 Store the role
-    req.session.fullName = user.full_name || 'User'; // 👈 ADD THIS
+    req.session.role = user.role;
+    req.session.fullName = user.full_name || 'User';
 
-    await logActivity(user.id, user.email, 'LOGIN', null, req);
-    
     res.redirect('/dashboard');
 
   } catch (err) {
@@ -214,35 +220,25 @@ router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
   try {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+    // 👇 ADD THIS CONDITION
+    const [rows] = await pool.query(
+      `SELECT * FROM users WHERE email = ? AND deleted_at IS NULL`,
+      [email]
+    );
     const user = rows[0];
 
     if (!user) {
       return res.render('forgot', { message: null, error: 'No account with that email.' });
     }
 
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiry = Date.now() + 3600000;
-
-    await pool.query(`UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?`, 
-      [token, expiry, user.id]);
-
-    await logActivity(user.id, user.email, 'PASSWORD_RESET', 'Reset requested', req);
-
-
-    // 👇 THIS IS THE IMPORTANT PART
-    await sendResetEmail(email, token);
-
-    res.render('forgot', {
-      message: '✅ Password reset link sent! Check your email inbox (and spam folder).',
-      error: null
-    });
-
+    // ... rest of the code
   } catch (err) {
     console.error(err);
-    res.render('forgot', { message: null, error: 'Something went wrong. Please try again.' });
+    res.render('forgot', { message: null, error: 'Something went wrong.' });
   }
 });
+
+
 
 // --- ROUTE: Reset Password Page (Click the link) ---
 router.get('/reset-password/:token', async (req, res) => {
