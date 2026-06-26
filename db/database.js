@@ -10,8 +10,12 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
-  timezone: '+08:00'  // 👈 THIS CONVERTS ALL TIMES TO PHILIPPINE TIME
+  queueLimit: 0
+});
+
+// 👇 Set timezone on every connection
+pool.on('connection', (connection) => {
+  connection.query(`SET time_zone = '+08:00'`);
 });
 
 
