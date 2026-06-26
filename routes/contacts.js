@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db/database');
 
 const logActivity = require('../helpers/activityLogger');
+const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
 // --- HELPER: Middleware to protect routes ---
 function isAuthenticated(req, res, next) {
@@ -10,12 +11,7 @@ function isAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-function isAdmin(req, res, next) {
-  if (req.session.role === 'admin') {
-    return next();
-  }
-  res.status(403).send("❌ Access Denied. Only admins can edit or delete contacts.");
-}
+
 
 // --- ROUTE: List all Contacts (WITH SEARCH) ---
 router.get('/contacts', isAuthenticated, async (req, res) => {

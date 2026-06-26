@@ -12,15 +12,7 @@ function isAuthenticated(req, res, next) {
 }
 
 // --- HELPER: Check if user is admin ---
-function isAdmin(req, res, next) {
-  if (req.session.userId && req.session.role === 'admin') {
-    return next();
-  }
-  res.status(403).render('error', {
-    message: 'You do not have admin privileges to access this page.',
-    user: req.session
-  });
-}
+
 
 // --- ROUTE: Staff Dashboard (Attendance View) ---
 router.get('/attendance', isAuthenticated, async (req, res) => {
