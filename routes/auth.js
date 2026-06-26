@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const pool = require('../db/database');
 
+const { isAuthenticated, isAdmin } = require('../helpers/authMiddleware');
+
 
 const axios = require('axios'); // 👈 Make sure this is at the top of the file
 const logActivity = require('../helpers/activityLogger');
