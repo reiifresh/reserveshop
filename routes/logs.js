@@ -3,16 +3,7 @@ const router = express.Router();
 const pool = require('../db/database');
 const { isAdmin } = require('../helpers/authMiddleware');
 
-function isAdmin(req, res, next) {
-  if (req.session.userId && req.session.role === 'admin') {
-    return next();
-  }
-  // 👇 Use the error view instead of raw text
-  res.status(403).render('error', {
-    message: 'You do not have admin privileges to access this page.',
-    user: req.session
-  });
-}
+
 
 // --- ROUTE: Activity Log (Admin Only) with Filters ---
 router.get('/logs', isAdmin, async (req, res) => {
