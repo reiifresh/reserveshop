@@ -142,7 +142,7 @@ router.post('/staff/add', isAdmin, async (req, res) => {
   }
 });
 
-// ─── ADMIN: Soft Delete Staff ───
+// ─── ADMIN ONLY: Soft Delete Staff ───
 router.get('/staff/delete/:id', isAdmin, async (req, res) => {
   const { id } = req.params;
 
@@ -151,15 +151,20 @@ router.get('/staff/delete/:id', isAdmin, async (req, res) => {
       return res.send("❌ You cannot delete your own account.");
     }
 
-    // 👇 Soft delete instead of hard delete
+    // 👇 THIS MUST BE SET
     await pool.query(`UPDATE users SET deleted_at = NOW() WHERE id = ?`, [id]);
 
-    // Log the activity
-    await logActivity(req.session.userId, req.session.email, 'STAFF_DELETED', `Staff ID ${id} soft deleted`, req);
+    await logActivity(
+      req.session.userId,
+      req.session.email,
+      'STAFF_DELETED',
+      `Staff ID ${id} soft deleted`,
+      req
+    );
 
     res.redirect('/staff');
   } catch (err) {
-    console.error(err);
+    console.error("❌ Delete error:", err);
     res.redirect('/staff');
   }
 });
