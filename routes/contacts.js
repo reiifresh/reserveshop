@@ -6,10 +6,6 @@ const logActivity = require('../helpers/activityLogger');
 const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
 // --- HELPER: Middleware to protect routes ---
-function isAuthenticated(req, res, next) {
-  if (req.session.userId) return next();
-  res.redirect('/login');
-}
 
 
 

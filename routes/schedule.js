@@ -3,12 +3,6 @@ const router = express.Router();
 const pool = require('../db/database');
 const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
-function isAuthenticated(req, res, next) {
-  if (req.session.userId) {
-    return next();
-  }
-  res.redirect('/login');
-}
 
 
 

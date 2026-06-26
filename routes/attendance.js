@@ -4,12 +4,6 @@ const pool = require('../db/database');
 const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
 // --- HELPER: Check if user is logged in ---
-function isAuthenticated(req, res, next) {
-  if (req.session.userId) {
-    return next();
-  }
-  res.redirect('/login');
-}
 
 // --- HELPER: Check if user is admin ---
 

@@ -10,10 +10,7 @@ const axios = require('axios'); // 👈 Make sure this is at the top of the file
 const logActivity = require('../helpers/activityLogger');
 
 // --- HELPER: Middleware to protect routes ---
-function isAuthenticated(req, res, next) {
-  if (req.session.userId) return next();
-  res.redirect('/login');
-}
+
 
 // --- HELPER: Send email via Ethereal (fake SMTP) ---
 // --- HELPER: Send Password Reset Email via Brevo API ---
