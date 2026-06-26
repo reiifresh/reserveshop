@@ -8,76 +8,137 @@
         <i class="fas fa-user-tie fa-2x text-primary"></i>
       </div>
       <div>
-        <h1 class="h3 mb-0">Welcome back, <%= user.fullName || 'Admin' %>!</h1>
+        <h1 class="h3 mb-0">Welcome back, <%= fullName %>!</h1>
         <p class="text-muted small">Logged in as <strong><%= userEmail %></strong></p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Stats Cards -->
+<!-- Quick Stats Row -->
 <div class="row g-3 mb-4">
-  <!-- Total Contacts -->
-  <div class="col-md-4">
-    <div class="card card-shadow h-100 border-0">
-      <div class="card-body text-center py-4">
-        <i class="fas fa-address-book fa-2x text-primary mb-2"></i>
-        <h5 class="card-title mb-0"><%= totalContacts %></h5>
-        <p class="card-text text-muted small">Total Contacts</p>
-        <a href="/contacts" class="btn btn-outline-primary btn-sm mt-2">
-          <i class="fas fa-arrow-right me-1"></i>View All
-        </a>
+  <div class="col-md-3 col-6">
+    <div class="card card-shadow border-0 h-100">
+      <div class="card-body text-center py-3">
+        <i class="fas fa-address-book fa-2x text-primary mb-1"></i>
+        <h4 class="mb-0"><%= totalContacts %></h4>
+        <p class="text-muted small">Contacts</p>
       </div>
     </div>
   </div>
-
-  <!-- Total Staff -->
-  <div class="col-md-4">
-    <div class="card card-shadow h-100 border-0">
-      <div class="card-body text-center py-4">
-        <i class="fas fa-users fa-2x text-success mb-2"></i>
-        <h5 class="card-title mb-0"><%= totalStaff %></h5>
-        <p class="card-text text-muted small">Staff Members</p>
-        <a href="/staff" class="btn btn-outline-success btn-sm mt-2">
-          <i class="fas fa-arrow-right me-1"></i>View All
-        </a>
+  <div class="col-md-3 col-6">
+    <div class="card card-shadow border-0 h-100">
+      <div class="card-body text-center py-3">
+        <i class="fas fa-users fa-2x text-success mb-1"></i>
+        <h4 class="mb-0"><%= totalStaff %></h4>
+        <p class="text-muted small">Staff</p>
       </div>
     </div>
   </div>
-
-  <!-- Quick Action / Add Contact -->
-  <div class="col-md-4">
-    <div class="card card-shadow h-100 border-0">
-      <div class="card-body text-center py-4">
-        <i class="fas fa-plus-circle fa-2x text-warning mb-2"></i>
-        <h5 class="card-title mb-0">Quick Action</h5>
-        <p class="card-text text-muted small">Add a new contact</p>
-        <a href="/contacts/add" class="btn btn-outline-warning btn-sm mt-2">
-          <i class="fas fa-plus me-1"></i>Add Contact
-        </a>
+  <div class="col-md-3 col-6">
+    <div class="card card-shadow border-0 h-100">
+      <div class="card-body text-center py-3">
+        <i class="fas fa-clock fa-2x text-warning mb-1"></i>
+        <h4 class="mb-0">
+          <% if (today && today.check_in && !today.check_out) { %>
+            <span class="text-success">●</span> Clocked In
+          <% } else if (today && today.check_in && today.check_out) { %>
+            <span class="text-secondary">●</span> Clocked Out
+          <% } else { %>
+            <span class="text-danger">●</span> Not Started
+          <% } %>
+        </h4>
+        <p class="text-muted small">Today's Status</p>
       </div>
     </div>
   </div>
+  <% if (isAdmin) { %>
+    <div class="col-md-3 col-6">
+      <div class="card card-shadow border-0 h-100">
+        <div class="card-body text-center py-3">
+          <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
+          <h4 class="mb-0"><%= pendingRequests %></h4>
+          <p class="text-muted small">Pending Requests</p>
+        </div>
+      </div>
+    </div>
+  <% } %>
 </div>
 
-<!-- Recent Activity Section -->
+<!-- Main Widgets Row -->
+<div class="row g-4">
 
-<% if (user && user.role === 'admin') { %>
-<div class="row">
-  <div class="col-12">
+  <!-- Left Column -->
+  <div class="col-lg-8">
+
+    <!-- Attendance Widget -->
+    <div class="card card-shadow border-0 mb-4">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <h5 class="mb-0">
+          <i class="fas fa-clock text-primary me-2"></i>Today's Attendance
+          <span class="badge bg-secondary ms-2"><%= new Date().toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' }) %></span>
+        </h5>
+      </div>
+      <div class="card-body">
+        <% if (today && today.check_in) { %>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span>Check In: <strong><%= today.check_in %></strong></span>
+            <span>Check Out: <strong><%= today.check_out || '—' %></strong></span>
+            <span>Hours: <strong><%= today.hours_worked || 'In progress' %></strong></span>
+          </div>
+          <% if (!today.check_out) { %>
+            <form method="POST" action="/attendance/check-out" class="mt-2">
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-sign-out-alt me-1"></i>Clock Out
+              </button>
+            </form>
+          <% } %>
+        <% } else { %>
+          <p class="text-muted mb-2">You haven't clocked in today.</p>
+          <form method="POST" action="/attendance/check-in">
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="fas fa-sign-in-alt me-1"></i>Clock In
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Weekly Summary Chart (Bar) -->
+    <div class="card card-shadow border-0 mb-4">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <h5 class="mb-0">
+          <i class="fas fa-chart-bar text-success me-2"></i>Weekly Hours
+        </h5>
+      </div>
+      <div class="card-body">
+        <% if (weeklySummary.length === 0) { %>
+          <p class="text-muted">No attendance data this week.</p>
+        <% } else { %>
+          <div class="d-flex align-items-end justify-content-between" style="height: 150px;">
+            <% const maxHours = Math.max(...weeklySummary.map(d => d.hours_worked || 0), 1); %>
+            <% weeklySummary.forEach(day => { %>
+              <div class="text-center" style="flex:1;">
+                <div style="height: <%= (day.hours_worked || 0) / maxHours * 120 %>px; width: 30px; background: <%= day.hours_worked ? '#4f46e5' : '#e5e7eb' %>; border-radius: 4px 4px 0 0; margin: 0 auto;"></div>
+                <small class="text-muted"><%= day.date ? new Date(day.date).toLocaleDateString('en-PH', { weekday: 'short' }) : '—' %></small>
+                <small class="d-block text-muted"><%= day.hours_worked || '0' %></small>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
     <div class="card card-shadow border-0">
       <div class="card-header bg-transparent border-0 pt-3">
         <h5 class="mb-0">
-          <i class="fas fa-clock text-primary me-2"></i>Recent Activity
-          <span class="badge bg-secondary ms-2"><%= recentActivity.length %></span>
+          <i class="fas fa-history text-primary me-2"></i>Recent Activity
         </h5>
       </div>
-      <div class="card-body pt-0">
+      <div class="card-body">
         <% if (recentActivity.length === 0) { %>
-          <div class="text-center text-muted py-4">
-            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-            <p class="mb-0">No recent activity to show.</p>
-          </div>
+          <p class="text-muted">No recent activity.</p>
         <% } else { %>
           <div class="list-group list-group-flush">
             <% recentActivity.forEach(log => { %>
@@ -98,37 +159,82 @@
                   </span>
                 </div>
                 <div class="text-muted small">
-                  <% if (log.country_code) { %>
-                    <span class="me-2"><%= getFlagEmoji(log.country_code) %></span>
-                  <% } %>
                   <%= new Date(log.created_at).toLocaleString() %>
                 </div>
               </div>
             <% }) %>
           </div>
+        <% } %>
+        <div class="text-end mt-3">
+          <a href="/logs" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-history me-1"></i>View Full Log
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-          <% if (user && user.role === 'admin') { %>
-          <div class="text-end mt-3">
-            <a href="/logs" class="btn btn-sm btn-outline-primary">
-              <i class="fas fa-history me-1"></i>View Full Activity Log
+  <!-- Right Column -->
+  <div class="col-lg-4">
+
+    <!-- Staff Clocked In (Admin Only) -->
+    <% if (isAdmin) { %>
+      <div class="card card-shadow border-0 mb-4">
+        <div class="card-header bg-transparent border-0 pt-3">
+          <h5 class="mb-0">
+            <i class="fas fa-users text-success me-2"></i>Clocked In
+            <span class="badge bg-success ms-2"><%= clockedInStaff.length %></span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <% if (clockedInStaff.length === 0) { %>
+            <p class="text-muted">No one is clocked in right now.</p>
+          <% } else { %>
+            <ul class="list-group list-group-flush">
+              <% clockedInStaff.forEach(staff => { %>
+                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                  <span><%= staff.full_name || staff.email %></span>
+                  <span class="badge bg-success"><%= staff.check_in %></span>
+                </li>
+              <% }) %>
+            </ul>
+          <% } %>
+          <div class="mt-2">
+            <a href="/attendance/admin" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-edit me-1"></i>Manage Attendance
             </a>
           </div>
-          <% } %>
+        </div>
+      </div>
+    <% } %>
 
-        <% } %>
+    <!-- Quick Actions -->
+    <div class="card card-shadow border-0">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <h5 class="mb-0">
+          <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <a href="/contacts/add" class="btn btn-outline-primary">
+            <i class="fas fa-plus me-1"></i>Add Contact
+          </a>
+          <a href="/attendance" class="btn btn-outline-success">
+            <i class="fas fa-clock me-1"></i>View Attendance
+          </a>
+          <a href="/schedule" class="btn btn-outline-info">
+            <i class="fas fa-calendar-alt me-1"></i>My Schedule
+          </a>
+          <% if (isAdmin) { %>
+            <a href="/staff/add" class="btn btn-outline-secondary">
+              <i class="fas fa-user-plus me-1"></i>Add Staff
+            </a>
+          <% } %>
+        </div>
       </div>
     </div>
   </div>
 </div>
-<% } %>
 
 <%- include('partials/footer') %>
-
-<% 
-  // Helper: Convert country code to flag emoji
-  function getFlagEmoji(countryCode) {
-    if (!countryCode) return '';
-    const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-  }
-%>

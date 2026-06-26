@@ -102,6 +102,9 @@ router.post('/login', async (req, res) => {
 // --- ROUTE: Dashboard (Protected) ---
 router.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
+    const staffId = req.session.userId;
+    const isAdmin = req.session.role === 'admin';
+
     // Get total contacts count
     const [contactCount] = await pool.query(`SELECT COUNT(*) as count FROM contacts`);
     const totalContacts = contactCount[0].count;
@@ -109,6 +112,49 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     // Get total staff count (excluding the logged-in admin)
     const [staffCount] = await pool.query(`SELECT COUNT(*) as count FROM users WHERE id != ?`, [req.session.userId]);
     const totalStaff = staffCount[0].count;
+
+    // Get today's attendance for the logged-in user
+    const [todayAttendance] = await pool.query(
+      `SELECT * FROM attendance 
+       WHERE staff_id = ? AND date = CURDATE()`,
+      [staffId]
+    );
+    const today = todayAttendance[0] || null;
+
+    // Get pending schedule requests (admin only)
+    let pendingRequests = 0;
+    if (isAdmin) {
+      const [pending] = await pool.query(
+        `SELECT COUNT(*) as count FROM schedule_requests WHERE status = 'pending'`
+      );
+      pendingRequests = pending[0].count;
+    }
+
+    // Get staff currently clocked in (admin only)
+    let clockedInStaff = [];
+    if (isAdmin) {
+      const [staff] = await pool.query(`
+        SELECT u.id, u.email, u.full_name, a.check_in 
+        FROM attendance a
+        JOIN users u ON a.staff_id = u.id
+        WHERE a.date = CURDATE() AND a.check_out IS NULL
+      `);
+      clockedInStaff = staff;
+    }
+
+    // Get weekly attendance summary for the logged-in user
+    const [weeklySummary] = await pool.query(`
+      SELECT 
+        DAYNAME(date) as day_name,
+        date,
+        check_in,
+        check_out,
+        hours_worked
+      FROM attendance 
+      WHERE staff_id = ? 
+        AND date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+      ORDER BY date ASC
+    `, [staffId]);
 
     // Get recent activity (last 5 actions)
     const [recentActivity] = await pool.query(`
@@ -118,24 +164,38 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     `);
 
     res.render('dashboard', {
+      user: req.session,
       userEmail: req.session.email,
+      fullName: req.session.full_name || 'Admin',
       totalContacts: totalContacts,
       totalStaff: totalStaff,
+      today: today,
+      isAdmin: isAdmin,
+      pendingRequests: pendingRequests,
+      clockedInStaff: clockedInStaff,
+      weeklySummary: weeklySummary,
       recentActivity: recentActivity,
-      user: req.session // 👈 So the navbar works
+      message: req.session.message || null
     });
+    req.session.message = null;
   } catch (err) {
     console.error("❌ Dashboard error:", err);
     res.render('dashboard', {
+      user: req.session,
       userEmail: req.session.email,
+      fullName: 'Admin',
       totalContacts: 0,
       totalStaff: 0,
+      today: null,
+      isAdmin: false,
+      pendingRequests: 0,
+      clockedInStaff: [],
+      weeklySummary: [],
       recentActivity: [],
-      user: req.session
+      message: null
     });
   }
 });
-
 
 // --- ROUTE: Logout ---
 router.get('/logout', async (req, res) => {
