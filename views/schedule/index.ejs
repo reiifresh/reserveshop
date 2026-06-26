@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <h2><i class="fas fa-calendar-alt text-primary me-2"></i>My Schedule</h2>
+    <hr>
+  </div>
+</div>
+
+<% if (message) { %>
+  <div class="alert alert-info"><%= message %></div>
+<% } %>
+
+<div class="row">
+  <div class="col-md-8 mx-auto">
+    <div class="card card-shadow">
+      <div class="card-body">
+        <h5 class="mb-3">Choose Your Schedule for <%= new Date(monthYear).toLocaleString('default', { month: 'long', year: 'numeric' }) %></h5>
+
+        <% if (currentRequest) { %>
+          <div class="alert alert-secondary">
+            <strong>Current Request:</strong><br>
+            Schedule: <strong><%= currentRequest.schedule_type %></strong><br>
+            Status: 
+            <span class="badge 
+              <%= currentRequest.status === 'pending' ? 'bg-warning' : 
+                  currentRequest.status === 'approved' ? 'bg-success' : 'bg-danger' %>">
+              <%= currentRequest.status %>
+            </span>
+            <br>
+            <small class="text-muted">Submitted: <%= new Date(currentRequest.created_at).toLocaleString() %></small>
+          </div>
+        <% } %>
+
+        <form method="POST" action="/schedule/request">
+          <div class="mb-3">
+            <label class="form-label">Select Schedule Type</label>
+            <select name="schedule_type" class="form-select" required>
+              <option value="">-- Select --</option>
+              <option value="4_day_week">4-Day Work Week (Mon-Thu)</option>
+              <option value="3_on_1_off">3-On, 1-Off (Rotating)</option>
+              <option value="flexi">Flexi-Time (Choose your own hours)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason / Note (Optional)</label>
+            <textarea name="reason" class="form-control" rows="2" placeholder="Any notes for admin..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" <%= currentRequest && currentRequest.status === 'pending' ? 'disabled' : '' %>>
+            <i class="fas fa-paper-plane me-2"></i>Submit Request
+          </button>
+        </form>
+
+        <hr class="my-4">
+
+        <h6>Schedule Overview</h6>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Work Days</th>
+              <th>Rest Days</th>
+              <th>Hours/Week</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>4-Day Week</strong></td>
+              <td>Mon-Thu</td>
+              <td>Fri-Sun</td>
+              <td>32</td>
+            </tr>
+            <tr>
+              <td><strong>3-On, 1-Off</strong></td>
+              <td>3 days work, 1 day rest (rotating)</td>
+              <td>1 day every 4 days</td>
+              <td>~32</td>
+            </tr>
+            <tr>
+              <td><strong>Flexi-Time</strong></td>
+              <td>Choose your own hours</td>
+              <td>Flexible</td>
+              <td>Target: 32-40</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

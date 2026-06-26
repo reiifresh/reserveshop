@@ -1,0 +1,75 @@
+<%- include('../partials/header') %>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <h2><i class="fas fa-calendar-check text-primary me-2"></i>Schedule Requests (Admin)</h2>
+    <hr>
+  </div>
+</div>
+
+<% if (message) { %>
+  <div class="alert alert-info"><%= message %></div>
+<% } %>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card card-shadow">
+      <div class="card-body">
+        <h5><i class="fas fa-clock text-warning me-2"></i>Pending Requests</h5>
+        <% if (pendingRequests.length === 0) { %>
+          <p class="text-muted">No pending requests.</p>
+        <% } else { %>
+          <ul class="list-group list-group-flush">
+            <% pendingRequests.forEach(req => { %>
+              <li class="list-group-item">
+                <strong><%= req.full_name || req.email %></strong><br>
+                Schedule: <strong><%= req.schedule_type %></strong><br>
+                Month: <%= new Date(req.month_year).toLocaleString('default', { month: 'long', year: 'numeric' }) %><br>
+                <small class="text-muted">Submitted: <%= new Date(req.created_at).toLocaleString() %></small>
+                <div class="mt-2">
+                  <form method="POST" action="/schedule/admin/action" style="display:inline;">
+                    <input type="hidden" name="request_id" value="<%= req.id %>">
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit" class="btn btn-success btn-sm">
+                      <i class="fas fa-check me-1"></i>Approve
+                    </button>
+                  </form>
+                  <form method="POST" action="/schedule/admin/action" style="display:inline;">
+                    <input type="hidden" name="request_id" value="<%= req.id %>">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      <i class="fas fa-times me-1"></i>Reject
+                    </button>
+                  </form>
+                </div>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card card-shadow">
+      <div class="card-body">
+        <h5><i class="fas fa-check-circle text-success me-2"></i>Approved Requests (Recent)</h5>
+        <% if (approvedRequests.length === 0) { %>
+          <p class="text-muted">No approved requests yet.</p>
+        <% } else { %>
+          <ul class="list-group list-group-flush">
+            <% approvedRequests.forEach(req => { %>
+              <li class="list-group-item">
+                <strong><%= req.full_name || req.email %></strong><br>
+                Schedule: <strong><%= req.schedule_type %></strong><br>
+                Month: <%= new Date(req.month_year).toLocaleString('default', { month: 'long', year: 'numeric' }) %>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
