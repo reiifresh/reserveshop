@@ -173,10 +173,16 @@ router.get('/staff/archived', isAdmin, async (req, res) => {
        WHERE deleted_at IS NOT NULL 
        ORDER BY deleted_at DESC`
     );
+
+    // 👇 Get the message from session, then clear it
+    const message = req.session.message || null;
+    req.session.message = null;
+
     res.render('staff/archived', { 
       staff: rows, 
       userEmail: req.session.email,
-      user: req.session
+      user: req.session,
+      message: message  // 👈 PASS THE MESSAGE
     });
   } catch (err) {
     console.error("❌ Archived error:", err);
