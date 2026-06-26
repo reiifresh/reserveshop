@@ -52,23 +52,21 @@
       </div>
     </div>
   </div>
-  <% if (isAdmin) { %>
-    <div class="col-md-3 col-6">
-      <div class="card card-shadow border-0 h-100">
-        <div class="card-body text-center py-3">
-          <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
-          <h4 class="mb-0"><%= pendingRequests %></h4>
-          <p class="text-muted small">Pending Requests</p>
-        </div>
+  <div class="col-md-3 col-6">
+    <div class="card card-shadow border-0 h-100">
+      <div class="card-body text-center py-3">
+        <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
+        <h4 class="mb-0"><%= pendingRequests %></h4>
+        <p class="text-muted small">Pending Requests</p>
       </div>
     </div>
-  <% } %>
+  </div>
 </div>
 
-<!-- Main Widgets Row -->
+<!-- Main Two-Column Layout -->
 <div class="row g-4">
 
-  <!-- Left Column -->
+  <!-- LEFT COLUMN -->
   <div class="col-lg-8">
 
     <!-- Attendance Widget -->
@@ -104,7 +102,7 @@
       </div>
     </div>
 
-    <!-- Weekly Summary Chart (Bar) -->
+    <!-- Weekly Summary Chart -->
     <div class="card card-shadow border-0 mb-4">
       <div class="card-header bg-transparent border-0 pt-3">
         <h5 class="mb-0">
@@ -174,40 +172,39 @@
         </div>
       </div>
     <% } %>
+  </div>
 
-  <!-- Right Column -->
+  <!-- RIGHT COLUMN -->
   <div class="col-lg-4">
 
-    <!-- Staff Clocked In (Admin Only) -->
-    <% if (isAdmin) { %>
-      <div class="card card-shadow border-0 mb-4">
-        <div class="card-header bg-transparent border-0 pt-3">
-          <h5 class="mb-0">
-            <i class="fas fa-users text-success me-2"></i>Clocked In
-            <span class="badge bg-success ms-2"><%= clockedInStaff.length %></span>
-          </h5>
-        </div>
-        <div class="card-body">
-          <% if (clockedInStaff.length === 0) { %>
-            <p class="text-muted">No one is clocked in right now.</p>
-          <% } else { %>
-            <ul class="list-group list-group-flush">
-              <% clockedInStaff.forEach(staff => { %>
-                <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                  <span><%= staff.full_name || staff.email %></span>
-                  <span class="badge bg-success"><%= staff.check_in %></span>
-                </li>
-              <% }) %>
-            </ul>
-          <% } %>
-          <div class="mt-2">
-            <a href="/attendance/admin" class="btn btn-sm btn-outline-secondary">
-              <i class="fas fa-edit me-1"></i>Manage Attendance
-            </a>
-          </div>
+    <!-- Staff Clocked In -->
+    <div class="card card-shadow border-0 mb-4">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <h5 class="mb-0">
+          <i class="fas fa-users text-success me-2"></i>Clocked In
+          <span class="badge bg-success ms-2"><%= clockedInStaff.length %></span>
+        </h5>
+      </div>
+      <div class="card-body">
+        <% if (clockedInStaff.length === 0) { %>
+          <p class="text-muted">No one is clocked in right now.</p>
+        <% } else { %>
+          <ul class="list-group list-group-flush">
+            <% clockedInStaff.forEach(staff => { %>
+              <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                <span><%= staff.full_name || staff.email %></span>
+                <span class="badge bg-success"><%= staff.check_in %></span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+        <div class="mt-2">
+          <a href="/attendance/admin" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-edit me-1"></i>Manage Attendance
+          </a>
         </div>
       </div>
-    <% } %>
+    </div>
 
     <!-- Quick Actions -->
     <div class="card card-shadow border-0">
@@ -227,11 +224,12 @@
           <a href="/schedule" class="btn btn-outline-info">
             <i class="fas fa-calendar-alt me-1"></i>My Schedule
           </a>
-          <% if (isAdmin) { %>
-            <a href="/staff/add" class="btn btn-outline-secondary">
-              <i class="fas fa-user-plus me-1"></i>Add Staff
-            </a>
-          <% } %>
+          <a href="/staff/add" class="btn btn-outline-secondary">
+            <i class="fas fa-user-plus me-1"></i>Add Staff
+          </a>
+          <a href="/leave" class="btn btn-outline-warning">
+            <i class="fas fa-umbrella-beach me-1"></i>My Leave
+          </a>
         </div>
       </div>
     </div>
