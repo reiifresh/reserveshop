@@ -68,6 +68,11 @@ router.get('/staff', isHR, async (req, res) => {
        WHERE id != ? AND deleted_at IS NULL`,
       [req.session.userId]
     );
+    res.render('staff/index', { 
+      staff: rows, 
+      userEmail: req.session.email, 
+      user: req.session 
+    });
   } catch (err) {
     console.error(err);
     res.send("Error loading staff.");
