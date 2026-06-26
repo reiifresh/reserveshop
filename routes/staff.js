@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const pool = require('../db/database');
+const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
 const axios = require('axios'); // 👈 Add this at the top of the file
 
@@ -63,21 +64,11 @@ async function sendWelcomeEmail(email, tempPassword) {
 }
 
 
-// --- ROUTE: List All Staff (Admin Only) ---
-router.get('/staff', isAdmin, async (req, res) => {
+// ─── ADMIN/HR: View Staff List (Read-only) ───
+router.get('/staff', isHR, async (req, res) => {
   try {
-    console.log("🔍 Fetching staff list..."); // 👈 ADD THIS LINE
-
-    // Get all users EXCEPT the currently logged-in admin
     const [rows] = await pool.query(`SELECT id, email, full_name, role, created_at FROM users WHERE id != ?`, [req.session.userId]);
-
-
-    console.log("✅ Staff fetched:", rows.length, "records found"); // 👈 ADD THIS LINE
-
-     res.render('staff/index', { staff: rows, userEmail: req.session.email });
-
-
-
+    res.render('staff/index', { staff: rows, userEmail: req.session.email, user: req.session });
   } catch (err) {
     console.error(err);
     res.send("Error loading staff.");

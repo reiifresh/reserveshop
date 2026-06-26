@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/database');
+const { isAdmin } = require('../helpers/authMiddleware');
 
 function isAdmin(req, res, next) {
   if (req.session.userId && req.session.role === 'admin') {

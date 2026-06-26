@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/database');
+const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
 function isAuthenticated(req, res, next) {
   if (req.session.userId) {
@@ -88,7 +89,7 @@ router.post('/schedule/request', isAuthenticated, async (req, res) => {
 });
 
 // ─── ADMIN: View Pending Requests ───
-router.get('/schedule/admin', isAdmin, async (req, res) => {
+router.get('/schedule/admin', isHR, async (req, res) => {
   try {
     const [requests] = await pool.query(`
       SELECT sr.*, u.email, u.full_name 
@@ -122,7 +123,7 @@ router.get('/schedule/admin', isAdmin, async (req, res) => {
 });
 
 // ─── ADMIN: Approve / Reject Request ───
-router.post('/schedule/admin/action', isAdmin, async (req, res) => {
+router.post('/schedule/admin/action', isHR, async (req, res) => {
   try {
     const { request_id, action } = req.body;
     const adminId = req.session.userId;

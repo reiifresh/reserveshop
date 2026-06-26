@@ -92,16 +92,22 @@
             </ul>
           </li>
 
-          <!-- ========== ADMIN DROPDOWN (ADMIN ONLY) ========== -->
-          <% if (user.role === 'admin') { %>
+          <!-- HR Dropdown (Admin + HR Manager) -->
+          <% if (user && (user.role === 'admin' || user.role === 'hr_manager')) { %>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-user-cog me-1"></i>Admin
+              <a class="nav-link dropdown-toggle" href="#" id="hrDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-briefcase me-1"></i>HR
               </a>
-              <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
-                <li><a class="dropdown-item" href="/staff"><i class="fas fa-users me-2"></i>Staff</a></li>
+              <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="hrDropdown">
+                <li><a class="dropdown-item" href="/leave/admin"><i class="fas fa-clipboard-list me-2"></i>Leave Requests</a></li>
                 <li><a class="dropdown-item" href="/attendance/admin"><i class="fas fa-edit me-2"></i>Manage Attendance</a></li>
-                <li><a class="dropdown-item" href="/logs"><i class="fas fa-history me-2"></i>Activity Log</a></li>
+                <li><a class="dropdown-item" href="/schedule/admin"><i class="fas fa-calendar-check me-2"></i>Schedule Requests</a></li>
+                
+                <% if (user.role === 'admin') { %>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/staff"><i class="fas fa-users me-2"></i>Staff Management</a></li>
+                  <li><a class="dropdown-item" href="/logs"><i class="fas fa-history me-2"></i>Activity Log</a></li>
+                <% } %>
               </ul>
             </li>
           <% } %>

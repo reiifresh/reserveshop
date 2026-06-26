@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/database');
+const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
 // --- HELPER: Check if user is logged in ---
 function isAuthenticated(req, res, next) {
@@ -181,7 +182,7 @@ router.post('/attendance/undo', isAuthenticated, async (req, res) => {
 
 
 // ─── ADMIN: View All Attendance Records ───
-router.get('/attendance/admin', isAdmin, async (req, res) => {
+router.get('/attendance/admin', isHR, async (req, res) => {
   try {
     const [records] = await pool.query(`
       SELECT a.*, u.email, u.full_name 
@@ -205,7 +206,7 @@ router.get('/attendance/admin', isAdmin, async (req, res) => {
 });
 
 // ─── ADMIN: Update Attendance Record ───
-router.post('/attendance/admin/update/:id', isAdmin, async (req, res) => {
+router.post('/attendance/admin/update/:id', isHR, async (req, res) => {
   try {
     const { id } = req.params;
     const { check_in, check_out, hours_worked } = req.body;
