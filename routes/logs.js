@@ -6,7 +6,11 @@ function isAdmin(req, res, next) {
   if (req.session.userId && req.session.role === 'admin') {
     return next();
   }
-  res.status(403).send("❌ Access Denied. Admins only.");
+  // 👇 Use the error view instead of raw text
+  res.status(403).render('error', {
+    message: 'You do not have admin privileges to access this page.',
+    user: req.session
+  });
 }
 
 // --- ROUTE: Activity Log (Admin Only) with Filters ---
