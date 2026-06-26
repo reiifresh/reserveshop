@@ -16,8 +16,10 @@ const logActivity = require('../helpers/activityLogger');
 // --- HELPER: Send Welcome Email with Temporary Password ---
 // --- HELPER: Send Welcome Email with Temporary Password ---
 // --- HELPER: Send Welcome Email with Brevo API ---
-async function sendWelcomeEmail(email, tempPassword) {
+async function sendWelcomeEmail(email, tempPassword, role = 'staff') {
   const loginLink = `https://${process.env.APP_URL || 'localhost:3000'}/login`;
+
+  const roleDisplay = role === 'hr_manager' ? 'HR Manager' : 'Staff';
   
   try {
     const response = await axios.post(
@@ -28,10 +30,10 @@ async function sendWelcomeEmail(email, tempPassword) {
           name: 'CRM Admin'
         },
         to: [{ email: email }],
-        subject: "Welcome to the CRM! Your Staff Account",
+        subject: `Welcome to the CRM! Your ${roleDisplay} Account`, // 👈 DYNAMIC SUBJECT
         htmlContent: `
           <h3>Welcome to the team! 🎉</h3>
-          <p>Your staff account has been created. Here are your login credentials:</p>
+          <p>Your <strong>${roleDisplay}</strong> account has been created. Here are your login credentials:</p>
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Temporary Password:</strong> <code>${tempPassword}</code></p>
           <p><a href="${loginLink}">Click here to log in</a></p>
@@ -43,7 +45,7 @@ async function sendWelcomeEmail(email, tempPassword) {
           'api-key': process.env.BREVO_API_KEY,
           'Content-Type': 'application/json'
         },
-        timeout: 15000 // 15 second timeout
+        timeout: 15000
       }
     );
     
@@ -73,56 +75,60 @@ router.get('/staff/add', isAdmin, (req, res) => {
 });
 
 // --- ROUTE: Handle Add Staff (Admin Only) ---
+// --- ROUTE: Handle Add Staff (Admin Only) ---
 router.post('/staff/add', isAdmin, async (req, res) => {
-  // 1. Get the fullName from the form
-  const { email, fullName } = req.body;
+  const { email, fullName, role } = req.body;
 
-  // 2. Validation (check if name is empty)
   if (!fullName || fullName.trim() === '') {
-    return res.render('staff/add', { error: 'Full name is required.', success: null, userEmail: req.session.email });
+    return res.render('staff/add', { 
+      error: 'Full name is required.', 
+      success: null, 
+      userEmail: req.session.email 
+    });
+  }
+
+  if (!email || email.trim() === '') {
+    return res.render('staff/add', { 
+      error: 'Email is required.', 
+      success: null, 
+      userEmail: req.session.email 
+    });
   }
 
   try {
-    // 1. Check if email already exists
     const [existing] = await pool.query(`SELECT id FROM users WHERE email = ?`, [email.trim()]);
     if (existing.length > 0) {
-      return res.render('staff/add', { error: 'This email is already registered.', success: null, userEmail: req.session.email });
+      return res.render('staff/add', { 
+        error: 'This email is already registered.', 
+        success: null, 
+        userEmail: req.session.email 
+      });
     }
 
-    // 2. Generate a random temporary password (8 characters)
-    const tempPassword = crypto.randomBytes(4).toString('hex'); // e.g., "a1b2c3d4"
+    const tempPassword = crypto.randomBytes(4).toString('hex');
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-    // 3. Insert into database (add full_name)
-    await pool.query(`INSERT INTO users (email, password, role, full_name) VALUES (?, ?, ?, ?)`, 
-      [email.trim(), hashedPassword, 'staff', fullName.trim()]);
+    // 👇 ROLE IS NOW INCLUDED
+    await pool.query(
+      `INSERT INTO users (email, password, role, full_name) VALUES (?, ?, ?, ?)`,
+      [email.trim(), hashedPassword, role || 'staff', fullName.trim()]
+    );
 
-    // 👇 WRAP THIS IN A TRY/CATCH TO CATCH SPECIFIC ERRORS
-    try {
-      await logActivity(req.session.userId, req.session.email, 'STAFF_CREATED', `Staff "${email}" created`, req);
-      console.log("✅ Activity logged for staff creation");
-    } catch (logErr) {
-      console.error("❌ Failed to log activity:", logErr.message);
-      // Don't stop the process — just log the error and continue
-    }
-
-
-    // 4. Send the welcome email with the temp password
-    await sendWelcomeEmail(email.trim(), tempPassword);
+    await sendWelcomeEmail(email.trim(), tempPassword, role || 'staff');
 
     res.render('staff/add', { 
       error: null, 
-      success: `✅ Staff account created for ${email.trim()}. A welcome email has been sent. Check the terminal for the preview link.`, 
+      success: `✅ ${role || 'Staff'} account created for ${email.trim()}. A welcome email has been sent.`, 
       userEmail: req.session.email 
     });
 
   } catch (err) {
     console.error(err);
     res.render('staff/add', { 
-      error: 'Database error. Try again.' + err.message, 
+      error: 'Database error. Try again.', 
       success: null, 
-      userEmail: req.session.email });
-
+      userEmail: req.session.email 
+    });
   }
 });
 
