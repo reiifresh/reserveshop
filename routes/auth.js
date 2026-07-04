@@ -104,45 +104,44 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// --- ROUTE: Dashboard (Protected) ---
+// ─── ROUTE: Dashboard (Protected) ───
 router.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
-    const staffId = req.session.userId;
-    const isAdmin = req.session.role === 'admin';
-
     // Get total contacts count
     const [contactCount] = await pool.query(`SELECT COUNT(*) as count FROM contacts`);
     const totalContacts = contactCount[0].count;
 
-    // Get total staff count (excluding the logged-in admin)
-    const [staffCount] = await pool.query(`SELECT COUNT(*) as count FROM users WHERE id != ?`, [req.session.userId]);
-    const totalStaff = staffCount[0].count;
-
-    // Get today's attendance for the logged-in user
-    const [todayAttendance] = await pool.query(
-      `SELECT * FROM attendance 
-       WHERE staff_id = ? AND date = CURDATE()`,
-      [staffId]
+    // 👇 FIX THIS: Exclude archived staff
+    const [staffCount] = await pool.query(
+      `SELECT COUNT(*) as count FROM users WHERE id != ? AND deleted_at IS NULL`,
+      [req.session.userId]
     );
-    const today = todayAttendance[0] || null;
+    const totalStaff = staffCount[0].count;
 
     // Get pending schedule requests (admin only)
     let pendingRequests = 0;
-    if (isAdmin) {
+    if (req.session.role === 'admin') {
       const [pending] = await pool.query(
         `SELECT COUNT(*) as count FROM schedule_requests WHERE status = 'pending'`
       );
       pendingRequests = pending[0].count;
     }
 
+    // Get today's attendance for the logged-in user
+    const [todayAttendance] = await pool.query(
+      `SELECT * FROM attendance WHERE staff_id = ? AND date = CURDATE()`,
+      [req.session.userId]
+    );
+    const today = todayAttendance[0] || null;
+
     // Get staff currently clocked in (admin only)
     let clockedInStaff = [];
-    if (isAdmin) {
+    if (req.session.role === 'admin') {
       const [staff] = await pool.query(`
         SELECT u.id, u.email, u.full_name, a.check_in 
         FROM attendance a
         JOIN users u ON a.staff_id = u.id
-        WHERE a.date = CURDATE() AND a.check_out IS NULL
+        WHERE a.date = CURDATE() AND a.check_out IS NULL AND u.deleted_at IS NULL
       `);
       clockedInStaff = staff;
     }
@@ -159,7 +158,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       WHERE staff_id = ? 
         AND date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
       ORDER BY date ASC
-    `, [staffId]);
+    `, [req.session.userId]);
 
     // Get recent activity (last 5 actions)
     const [recentActivity] = await pool.query(`
@@ -175,11 +174,11 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       totalContacts: totalContacts,
       totalStaff: totalStaff,
       today: today,
-      isAdmin: isAdmin,
       pendingRequests: pendingRequests,
       clockedInStaff: clockedInStaff,
       weeklySummary: weeklySummary,
       recentActivity: recentActivity,
+      isAdmin: req.session.role === 'admin',
       message: req.session.message || null
     });
     req.session.message = null;
@@ -192,11 +191,11 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       totalContacts: 0,
       totalStaff: 0,
       today: null,
-      isAdmin: false,
       pendingRequests: 0,
       clockedInStaff: [],
       weeklySummary: [],
       recentActivity: [],
+      isAdmin: false,
       message: null
     });
   }
