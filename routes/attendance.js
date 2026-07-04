@@ -156,6 +156,7 @@ router.post('/attendance/undo', isAuthenticated, async (req, res) => {
   }
 });
 
+/*
 // ─── ADMIN/HR: Manage Attendance ───
 router.get('/attendance/admin', isHR, async (req, res) => {
   try {
@@ -164,7 +165,7 @@ router.get('/attendance/admin', isHR, async (req, res) => {
       FROM attendance a
       JOIN users u ON a.staff_id = u.id
       WHERE u.deleted_at IS NULL
-      ORDER BY a.date DESC, a.created_at DESC
+      ORDER BY a.date DESC
       LIMIT 100
     `);
 
@@ -202,5 +203,7 @@ router.post('/attendance/admin/update/:id', isHR, async (req, res) => {
     res.redirect('/attendance/admin');
   }
 });
+
+*/
 
 module.exports = router;

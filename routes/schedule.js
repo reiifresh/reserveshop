@@ -74,6 +74,7 @@ router.post('/schedule/request', isAuthenticated, async (req, res) => {
   }
 });
 
+/*
 // ─── ADMIN: View Pending Requests ───
 router.get('/schedule/admin', isHR, async (req, res) => {
   try {
@@ -107,6 +108,8 @@ router.get('/schedule/admin', isHR, async (req, res) => {
     res.send("Error loading admin schedule page.");
   }
 });
+
+*/
 
 // ─── ADMIN: Approve / Reject Request ───
 router.post('/schedule/admin/action', isHR, async (req, res) => {
