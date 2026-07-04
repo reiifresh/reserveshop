@@ -122,9 +122,12 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     const totalStaff = staffCount[0].count;
 
     // ─── Pending Schedule Requests ───
+    // ─── Pending Schedule & Leave Requests ───
     let pendingSchedule = 0;
     let pendingLeave = 0;
-    if (isAdmin) {
+
+    // Show pending requests for Admin AND HR
+    if (req.session.role === 'admin' || req.session.role === 'hr_manager') {
       const [schedulePending] = await pool.query(
         `SELECT COUNT(*) as count FROM schedule_requests WHERE status = 'pending'`
       );
@@ -133,7 +136,6 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       const [leavePending] = await pool.query(
         `SELECT COUNT(*) as count FROM leave_requests WHERE status = 'pending'`
       );
-      console.log("🔍 Pending leave count:", leavePending[0].count);
       pendingLeave = leavePending[0].count || 0;
     }
     const totalPending = pendingSchedule + pendingLeave;
