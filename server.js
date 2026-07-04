@@ -13,7 +13,7 @@ const pool = require('./db/database'); // 👈 MAKE SURE THIS EXISTS
 const attendanceRoutes = require('./routes/attendance');
 
 const scheduleRoutes = require('./routes/schedule');
-
+const leaveRoutes = require('./routes/leave');
 
 
 app.set('trust proxy', true);
@@ -60,6 +60,8 @@ app.use('/', logsRoutes);
 app.use('/', attendanceRoutes);
 
 app.use('/', scheduleRoutes);
+
+app.use('/', leaveRoutes);
 
 // ─── CLEANUP LOGS ENDPOINT (For cron-job.org) ───
 app.get('/api/clean-logs', async (req, res) => {

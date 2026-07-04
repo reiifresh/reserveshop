@@ -6,6 +6,7 @@ const logActivity = require('../helpers/activityLogger');
 
 // ─── STAFF: View Leave Page ───
 router.get('/leave', isAuthenticated, async (req, res) => {
+  console.log("🔍 Leave page requested");  // 👈 ADD THIS
   try {
     const staffId = req.session.userId;
     const currentYear = new Date().getFullYear();
