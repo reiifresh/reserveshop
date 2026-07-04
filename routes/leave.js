@@ -195,13 +195,13 @@ router.post('/leave/admin/action', isHR, async (req, res) => {
       return res.redirect('/leave/admin');
     }
 
-    // 👇 SELF-APPROVAL CHECK: Nobody can approve their own leave
+    // ─── SELF-APPROVAL CHECK ───
     if (request.staff_id === adminId) {
       req.session.message = '⚠️ You cannot approve your own leave request.';
       return res.redirect('/leave/admin');
     }
 
-    // 👇 HR REQUESTS: ONLY ADMIN CAN APPROVE
+    // ─── HR REQUESTS: ONLY ADMIN CAN APPROVE ───
     const [requesterRows] = await pool.query(
       `SELECT role FROM users WHERE id = ?`,
       [request.staff_id]
@@ -213,10 +213,57 @@ router.post('/leave/admin/action', isHR, async (req, res) => {
       return res.redirect('/leave/admin');
     }
 
-    // ✅ Admin requests: HR CAN approve (no restriction needed)
-    // Staff requests: HR or Admin can approve
+    // ─── APPROVE LOGIC ───
+    if (action === 'approve') {
+      // Update request status
+      await pool.query(
+        `UPDATE leave_requests 
+         SET status = 'approved', approved_by = ?, approved_at = NOW()
+         WHERE id = ?`,
+        [adminId, request_id]
+      );
 
-    // ... rest of the approve/reject logic
+      // Deduct from leave balance
+      const currentYear = new Date().getFullYear();
+      await pool.query(
+        `UPDATE leave_balances 
+         SET used_days = used_days + ?,
+             remaining_days = remaining_days - ?
+         WHERE staff_id = ? AND leave_type = ? AND year = ?`,
+        [request.days_requested, request.days_requested, request.staff_id, request.leave_type, currentYear]
+      );
+
+      // Log activity
+      await logActivity(
+        req.session.userId,
+        req.session.email,
+        'LEAVE_APPROVED',
+        `Approved ${request.leave_type} leave for ${request.days_requested} days (${request.start_date} - ${request.end_date})`,
+        req
+      );
+
+      req.session.message = `✅ Approved ${request.leave_type} leave for ${request.days_requested} days.`;
+    }
+
+    // ─── REJECT LOGIC ───
+    else if (action === 'reject') {
+      await pool.query(
+        `UPDATE leave_requests SET status = 'rejected', approved_by = ? WHERE id = ?`,
+        [adminId, request_id]
+      );
+
+      await logActivity(
+        req.session.userId,
+        req.session.email,
+        'LEAVE_REJECTED',
+        `Rejected ${request.leave_type} leave request for ${request.days_requested} days`,
+        req
+      );
+
+      req.session.message = `❌ Rejected leave request.`;
+    }
+
+    res.redirect('/leave/admin');
   } catch (err) {
     console.error("❌ Admin action error:", err);
     req.session.message = '❌ Failed to process action.';
