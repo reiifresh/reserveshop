@@ -156,7 +156,7 @@ router.post('/attendance/undo', isAuthenticated, async (req, res) => {
   }
 });
 
-/*
+
 // ─── ADMIN/HR: Manage Attendance ───
 router.get('/attendance/admin', isHR, async (req, res) => {
   try {
@@ -204,6 +204,6 @@ router.post('/attendance/admin/update/:id', isHR, async (req, res) => {
   }
 });
 
-*/
+
 
 module.exports = router;
