@@ -107,36 +107,46 @@ router.post('/login', async (req, res) => {
 // ─── ROUTE: Dashboard (Protected) ───
 router.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
-    // Get total contacts count
+    const staffId = req.session.userId;
+    const isAdmin = req.session.role === 'admin';
+
+    // ─── Total Contacts ───
     const [contactCount] = await pool.query(`SELECT COUNT(*) as count FROM contacts`);
     const totalContacts = contactCount[0].count;
 
-    // 👇 FIX THIS: Exclude archived staff
+    // ─── Total Staff (active only) ───
     const [staffCount] = await pool.query(
       `SELECT COUNT(*) as count FROM users WHERE id != ? AND deleted_at IS NULL`,
       [req.session.userId]
     );
     const totalStaff = staffCount[0].count;
 
-    // Get pending schedule requests (admin only)
-    let pendingRequests = 0;
-    if (req.session.role === 'admin') {
-      const [pending] = await pool.query(
+    // ─── Pending Schedule Requests ───
+    let pendingSchedule = 0;
+    let pendingLeave = 0;
+    if (isAdmin) {
+      const [schedulePending] = await pool.query(
         `SELECT COUNT(*) as count FROM schedule_requests WHERE status = 'pending'`
       );
-      pendingRequests = pending[0].count;
-    }
+      pendingSchedule = schedulePending[0].count || 0;
 
-    // Get today's attendance for the logged-in user
+      const [leavePending] = await pool.query(
+        `SELECT COUNT(*) as count FROM leave_requests WHERE status = 'pending'`
+      );
+      pendingLeave = leavePending[0].count || 0;
+    }
+    const totalPending = pendingSchedule + pendingLeave;
+
+    // ─── Today's Attendance (for logged-in user) ───
     const [todayAttendance] = await pool.query(
       `SELECT * FROM attendance WHERE staff_id = ? AND date = CURDATE()`,
-      [req.session.userId]
+      [staffId]
     );
     const today = todayAttendance[0] || null;
 
-    // Get staff currently clocked in (admin only)
+    // ─── Staff Clocked In (admin only) ───
     let clockedInStaff = [];
-    if (req.session.role === 'admin') {
+    if (isAdmin) {
       const [staff] = await pool.query(`
         SELECT u.id, u.email, u.full_name, a.check_in 
         FROM attendance a
@@ -146,7 +156,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       clockedInStaff = staff;
     }
 
-    // Get weekly attendance summary for the logged-in user
+    // ─── Weekly Summary (for logged-in user) ───
     const [weeklySummary] = await pool.query(`
       SELECT 
         DAYNAME(date) as day_name,
@@ -158,14 +168,18 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       WHERE staff_id = ? 
         AND date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
       ORDER BY date ASC
-    `, [req.session.userId]);
+    `, [staffId]);
 
-    // Get recent activity (last 5 actions)
+    // ─── Recent Activity (last 5 actions) ───
     const [recentActivity] = await pool.query(`
       SELECT * FROM activity_logs 
       ORDER BY created_at DESC 
       LIMIT 5
     `);
+
+    // ─── Flash Message ───
+    const message = req.session.message || null;
+    req.session.message = null;
 
     res.render('dashboard', {
       user: req.session,
@@ -174,14 +188,15 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       totalContacts: totalContacts,
       totalStaff: totalStaff,
       today: today,
-      pendingRequests: pendingRequests,
+      pendingSchedule: pendingSchedule,
+      pendingLeave: pendingLeave,
+      pendingRequests: totalPending,
       clockedInStaff: clockedInStaff,
       weeklySummary: weeklySummary,
       recentActivity: recentActivity,
-      isAdmin: req.session.role === 'admin',
-      message: req.session.message || null
+      isAdmin: isAdmin,
+      message: message
     });
-    req.session.message = null;
   } catch (err) {
     console.error("❌ Dashboard error:", err);
     res.render('dashboard', {
@@ -191,6 +206,8 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       totalContacts: 0,
       totalStaff: 0,
       today: null,
+      pendingSchedule: 0,
+      pendingLeave: 0,
       pendingRequests: 0,
       clockedInStaff: [],
       weeklySummary: [],
@@ -200,6 +217,8 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     });
   }
 });
+
+
 
 // --- ROUTE: Logout ---
 router.get('/logout', async (req, res) => {
