@@ -133,6 +133,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       const [leavePending] = await pool.query(
         `SELECT COUNT(*) as count FROM leave_requests WHERE status = 'pending'`
       );
+      console.log("🔍 Pending leave count:", leavePending[0].count);
       pendingLeave = leavePending[0].count || 0;
     }
     const totalPending = pendingSchedule + pendingLeave;
