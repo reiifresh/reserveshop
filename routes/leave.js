@@ -134,7 +134,8 @@ router.post('/leave/cancel/:id', isAuthenticated, async (req, res) => {
 // ─── ADMIN/HR: View Leave Management ───
 router.get('/leave/admin', isHR, async (req, res) => {
   try {
-    // Get pending requests (active staff only)
+    console.log("🔍 Fetching leave admin data...");
+
     const [pending] = await pool.query(`
       SELECT lr.*, u.full_name, u.email 
       FROM leave_requests lr
@@ -143,7 +144,8 @@ router.get('/leave/admin', isHR, async (req, res) => {
       ORDER BY lr.created_at ASC
     `);
 
-    // Get approved/recent history (active staff only)
+    console.log("✅ Pending requests fetched:", pending.length);
+
     const [approved] = await pool.query(`
       SELECT lr.*, u.full_name, u.email 
       FROM leave_requests lr
@@ -152,6 +154,8 @@ router.get('/leave/admin', isHR, async (req, res) => {
       ORDER BY lr.updated_at DESC
       LIMIT 20
     `);
+
+    console.log("✅ Approved requests fetched:", approved.length);
 
     res.render('leave/admin', {
       user: req.session,
@@ -163,7 +167,12 @@ router.get('/leave/admin', isHR, async (req, res) => {
     req.session.message = null;
   } catch (err) {
     console.error("❌ Admin leave error:", err);
-    res.send("Error loading leave management.");
+    console.error("❌ SQL Error Details:", {
+      message: err.message,
+      sql: err.sql,
+      code: err.code
+    });
+    res.send("Error loading leave management: " + err.message);
   }
 });
 
