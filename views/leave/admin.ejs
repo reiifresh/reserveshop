@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <h2><i class="fas fa-clipboard-list text-primary me-2"></i>Manage Leave Requests</h2>
+    <hr>
+  </div>
+</div>
+
+<% if (message) { %>
+  <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <%= message %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<div class="row g-4">
+
+  <!-- Pending Requests -->
+  <div class="col-md-6">
+    <div class="card card-shadow border-0">
+      <div class="card-body">
+        <h5><i class="fas fa-clock text-warning me-2"></i>Pending Requests</h5>
+        <% if (pending.length === 0) { %>
+          <p class="text-muted">No pending requests.</p>
+        <% } else { %>
+          <ul class="list-group list-group-flush">
+            <% pending.forEach(req => { %>
+              <li class="list-group-item">
+                <strong><%= req.full_name || req.email %></strong><br>
+                <span class="badge bg-info"><%= req.leave_type %></span>
+                <%= new Date(req.start_date).toLocaleDateString() %> - <%= new Date(req.end_date).toLocaleDateString() %>
+                (<%= req.days_requested %> days)<br>
+                <small class="text-muted"><%= req.reason || 'No reason provided' %></small>
+                <div class="mt-2">
+                  <form method="POST" action="/leave/admin/action" style="display:inline;">
+                    <input type="hidden" name="request_id" value="<%= req.id %>">
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit" class="btn btn-success btn-sm">
+                      <i class="fas fa-check me-1"></i>Approve
+                    </button>
+                  </form>
+                  <form method="POST" action="/leave/admin/action" style="display:inline;">
+                    <input type="hidden" name="request_id" value="<%= req.id %>">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      <i class="fas fa-times me-1"></i>Reject
+                    </button>
+                  </form>
+                </div>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approved/History -->
+  <div class="col-md-6">
+    <div class="card card-shadow border-0">
+      <div class="card-body">
+        <h5><i class="fas fa-check-circle text-success me-2"></i>Recent Activity</h5>
+        <% if (approved.length === 0) { %>
+          <p class="text-muted">No recent requests.</p>
+        <% } else { %>
+          <ul class="list-group list-group-flush">
+            <% approved.forEach(req => { %>
+              <li class="list-group-item">
+                <strong><%= req.full_name || req.email %></strong><br>
+                <span class="badge 
+                  <%= req.status === 'approved' ? 'bg-success' : 'bg-danger' %>">
+                  <%= req.status %>
+                </span>
+                <span class="badge bg-info"><%= req.leave_type %></span>
+                <%= new Date(req.start_date).toLocaleDateString() %> - <%= new Date(req.end_date).toLocaleDateString() %>
+                (<%= req.days_requested %> days)
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
