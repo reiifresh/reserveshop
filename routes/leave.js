@@ -299,8 +299,16 @@ router.post('/leave/allocate', isHR, async (req, res) => {
   try {
     const { staff_id, leave_type, days, year } = req.body;
 
+    // ─── REQUIRED FIELDS CHECK ───
     if (!staff_id || !leave_type || !days || !year) {
       req.session.message = '⚠️ All fields are required.';
+      return res.redirect('/leave/allocate');
+    }
+
+    // ─── MAX CAP CHECK ───
+    const MAX_DAYS = 30;
+    if (days > MAX_DAYS) {
+      req.session.message = `⚠️ You cannot allocate more than ${MAX_DAYS} days.`;
       return res.redirect('/leave/allocate');
     }
 
