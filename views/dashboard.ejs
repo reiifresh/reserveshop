@@ -16,8 +16,8 @@
 </div>
 
 
-<!-- Quick Stats Row -->
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3 mb-4">
+<!-- Row 1: Main Stats (Everyone) -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-4">
   <!-- Contacts -->
   <div class="col">
     <div class="card card-shadow border-0 h-100">
@@ -58,50 +58,46 @@
       </div>
     </div>
   </div>
-
 </div>
 
   
-  <!-- Undertime Widget (Admin/HR only) - Separate Row -->
-  <% if (isAdmin || user.role === 'hr_manager') { %>
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <a href="/undertime" class="text-decoration-none">
-          <div class="card card-shadow border-0 h-100">
-            <div class="card-body text-center py-3">
-              <i class="fas fa-hourglass-half fa-2x text-danger mb-1"></i>
-              <h4 class="mb-0"><%= hoursBalance ? hoursBalance.length : 0 %></h4>
-              <p class="text-muted small">Undertime Staff</p>
-            </div>
+  <!-- Row 2: Admin/HR Widgets (Undertime + Pending Requests) -->
+<% if (isAdmin || user.role === 'hr_manager') { %>
+  <div class="row row-cols-1 row-cols-sm-2 g-3 mb-4">
+    <!-- Undertime Staff -->
+    <div class="col">
+      <a href="/undertime" class="text-decoration-none">
+        <div class="card card-shadow border-0 h-100">
+          <div class="card-body text-center py-3">
+            <i class="fas fa-hourglass-half fa-2x text-danger mb-1"></i>
+            <h4 class="mb-0"><%= hoursBalance ? hoursBalance.length : 0 %></h4>
+            <p class="text-muted small">Undertime Staff</p>
           </div>
-        </a>
-      </div>
+        </div>
+      </a>
     </div>
-  <% } %>
 
-  <!-- Pending Requests Widget (Admin/HR only) -->
-  <% if (isAdmin || user.role === 'hr_manager') { %>
-    <div class="row g-3 mb-4">
-      <div class="col-md-3 col-6">
-        <a href="/leave/admin" class="text-decoration-none">
-          <div class="card card-shadow border-0 h-100">
-            <div class="card-body text-center py-3">
-              <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
-              <h4 class="mb-0"><%= pendingRequests %></h4>
-              <p class="text-muted small">Pending Requests</p>
-              <% if (pendingSchedule > 0 || pendingLeave > 0) { %>
-                <small class="text-muted">
-                  <%= pendingSchedule > 0 ? pendingSchedule + ' schedule' : '' %>
-                  <%= pendingSchedule > 0 && pendingLeave > 0 ? ' + ' : '' %>
-                  <%= pendingLeave > 0 ? pendingLeave + ' leave' : '' %>
-                </small>
-              <% } %>
-            </div>
+    <!-- Pending Requests -->
+    <div class="col">
+      <a href="/leave/admin" class="text-decoration-none">
+        <div class="card card-shadow border-0 h-100">
+          <div class="card-body text-center py-3">
+            <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
+            <h4 class="mb-0"><%= pendingRequests %></h4>
+            <p class="text-muted small">Pending Requests</p>
+            <% if (pendingSchedule > 0 || pendingLeave > 0) { %>
+              <small class="text-muted">
+                <%= pendingSchedule > 0 ? pendingSchedule + ' schedule' : '' %>
+                <%= pendingSchedule > 0 && pendingLeave > 0 ? ' + ' : '' %>
+                <%= pendingLeave > 0 ? pendingLeave + ' leave' : '' %>
+              </small>
+            <% } %>
           </div>
-        </a>
-      </div>
+        </div>
+      </a>
     </div>
-  <% } %>
+  </div>
+<% } %>
 
 
 
