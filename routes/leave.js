@@ -271,10 +271,38 @@ router.post('/leave/admin/action', isHR, async (req, res) => {
   }
 });
 
-// ─── ADMIN ONLY: Allocate Leave Balance ───
-router.post('/leave/admin/allocate', isAdmin, async (req, res) => {
+// ─── ADMIN/HR: Allocate Leave Credits (View Page) ───
+router.get('/leave/allocate', isHR, async (req, res) => {
   try {
-    const { staff_id, leave_type, total_days, year } = req.body;
+    // Get all active staff (excluding admin)
+    const [staff] = await pool.query(
+      `SELECT id, full_name, email FROM users 
+       WHERE role != 'admin' AND deleted_at IS NULL 
+       ORDER BY full_name`
+    );
+
+    res.render('leave/allocate', {
+      user: req.session,
+      userEmail: req.session.email,
+      staff: staff,
+      message: req.session.message || null
+    });
+    req.session.message = null;
+  } catch (err) {
+    console.error("❌ Allocate page error:", err);
+    res.send("Error loading allocate page.");
+  }
+});
+
+// ─── ADMIN/HR: Allocate Leave Credits (Submit) ───
+router.post('/leave/allocate', isHR, async (req, res) => {
+  try {
+    const { staff_id, leave_type, days, year } = req.body;
+
+    if (!staff_id || !leave_type || !days || !year) {
+      req.session.message = '⚠️ All fields are required.';
+      return res.redirect('/leave/allocate');
+    }
 
     // Check if balance exists
     const [existing] = await pool.query(
@@ -284,28 +312,28 @@ router.post('/leave/admin/allocate', isAdmin, async (req, res) => {
     );
 
     if (existing.length > 0) {
-      // Update
+      // Update existing balance
       await pool.query(
         `UPDATE leave_balances 
          SET total_days = ?, remaining_days = total_days - used_days
          WHERE staff_id = ? AND leave_type = ? AND year = ?`,
-        [total_days, staff_id, leave_type, year]
+        [days, staff_id, leave_type, year]
       );
     } else {
-      // Insert
+      // Insert new balance
       await pool.query(
         `INSERT INTO leave_balances (staff_id, leave_type, total_days, remaining_days, year)
          VALUES (?, ?, ?, ?, ?)`,
-        [staff_id, leave_type, total_days, total_days, year]
+        [staff_id, leave_type, days, days, year]
       );
     }
 
-    req.session.message = '✅ Leave balance updated!';
-    res.redirect('/leave/admin');
+    req.session.message = `✅ Allocated ${days} ${leave_type} days to staff member.`;
+    res.redirect('/leave/allocate');
   } catch (err) {
     console.error("❌ Allocate error:", err);
-    req.session.message = '❌ Failed to update balance.';
-    res.redirect('/leave/admin');
+    req.session.message = '❌ Failed to allocate leave.';
+    res.redirect('/leave/allocate');
   }
 });
 
