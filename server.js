@@ -48,6 +48,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// Pass current path to views for sidebar highlighting
+app.use((req, res, next) => {
+  res.locals.currentPath = req.path;
+  next();
+});
+
 // ─── USE ALL ROUTES ───
 app.use('/', authRoutes);
 app.use('/', contactRoutes);

@@ -3,19 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Reserve Shop</title>
-  
+  <title>Reserve Shop</title>
+
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  
+
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  
+
   <!-- Custom Styles -->
   <style>
     body {
       background: #f0f2f5;
       min-height: 100vh;
+    }
+    /* Sidebar spacing */
+    .main-content {
+      margin-left: 280px;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    @media (max-width: 991.98px) {
+      .main-content {
+        margin-left: 0;
+      }
     }
     .auth-wrapper {
       min-height: 90vh;
@@ -28,10 +39,6 @@
       border: none;
       border-radius: 16px;
     }
-    .navbar-brand {
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
     .btn-primary {
       background: #4f46e5;
       border: none;
@@ -39,104 +46,35 @@
     .btn-primary:hover {
       background: #4338ca;
     }
-    /* Dropdown hover effect */
-    .dropdown:hover .dropdown-menu {
-      display: block;
+    /* Sidebar hover effect */
+    .hover-bg:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+    .hover-bg-danger:hover {
+      background-color: rgba(220,53,69,0.2);
+    }
+    .sidebar .nav-link {
+      transition: all 0.2s ease;
+    }
+    @media (max-width: 991.98px) {
+      .sidebar {
+        display: none;
+      }
+    }
+    @media (min-width: 992px) {
+      .sidebar {
+        display: flex !important;
+      }
+      .offcanvas {
+        display: none !important;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- 🧭 NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-  <div class="container">
-    <a class="navbar-brand" href="/dashboard">
-      <i class="fas fa-compass me-2"></i>The Reserve Shop
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+<!-- Sidebar Partial -->
+<%- include('sidebar') %>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-
-        <% if (user && user.userId) { %>
-
-          <!-- ========== MAIN NAV LINKS ========== -->
-          <li class="nav-item">
-            <a class="nav-link" href="/dashboard">
-              <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/contacts">
-              <i class="fas fa-address-book me-1"></i>Contacts
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/attendance">
-              <i class="fas fa-clock me-1"></i>Attendance
-            </a>
-          </li>
-
-          <!-- ========== SCHEDULE DROPDOWN ========== -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="scheduleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-calendar-alt me-1"></i>Schedule
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="scheduleDropdown">
-              <li><a class="dropdown-item" href="/schedule"><i class="fas fa-user-clock me-2"></i>My Schedule</a></li>
-              <% if (user.role === 'admin') { %>
-                <li><a class="dropdown-item" href="/schedule/admin"><i class="fas fa-clipboard-list me-2"></i>Requests</a></li>
-              <% } %>
-            </ul>
-          </li>
-
-          <!-- HR Dropdown (Admin + HR Manager) -->
-          <% if (user && (user.role === 'admin' || user.role === 'hr_manager')) { %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="hrDropdown" role="button" data-bs-toggle="dropdown">
-                <i class="fas fa-briefcase me-1"></i>HR
-              </a>
-              <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="hrDropdown">
-                <li><a class="dropdown-item" href="/leave/admin"><i class="fas fa-clipboard-list me-2"></i>Leave Requests</a></li>
-                <li><a class="dropdown-item" href="/attendance/admin"><i class="fas fa-edit me-2"></i>Manage Attendance</a></li>
-                <li><a class="dropdown-item" href="/schedule/admin"><i class="fas fa-calendar-check me-2"></i>Schedule Requests</a></li>
-                
-                <% if (user.role === 'admin') { %>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="/staff"><i class="fas fa-users me-2"></i>Staff Management</a></li>
-                  <li><a class="dropdown-item" href="/logs"><i class="fas fa-history me-2"></i>Activity Log</a></li>
-                <% } %>
-              </ul>
-            </li>
-          <% } %>
-
-          <!-- ========== PROFILE & LOGOUT ========== -->
-          <li class="nav-item">
-            <a class="nav-link" href="/profile">
-              <i class="fas fa-user-circle me-1"></i>Profile
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-danger" href="/logout">
-              <i class="fas fa-sign-out-alt me-1"></i>Logout
-            </a>
-          </li>
-
-        <% } else { %>
-          <!-- ========== LOGGED OUT ========== -->
-          <li class="nav-item">
-            <a class="nav-link active" href="/login">
-              <i class="fas fa-lock me-1"></i>Login
-            </a>
-          </li>
-        <% } %>
-
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<!-- ===== MAIN CONTENT ===== -->
-<div class="container mt-4">
+<!-- Main Content Wrapper -->
+<div class="main-content">

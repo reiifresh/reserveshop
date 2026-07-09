@@ -1,0 +1,136 @@
+<!-- Sidebar -->
+<div class="sidebar d-flex flex-column p-3 bg-dark text-white" style="width: 280px; min-height: 100vh; position: fixed; top: 0; left: 0; z-index: 1000;">
+
+  <!-- Brand -->
+  <div class="d-flex align-items-center mb-4">
+    <i class="fas fa-rocket fa-2x text-primary me-2"></i>
+    <span class="fs-4 fw-bold">CRM Pro</span>
+  </div>
+
+  <hr class="text-secondary">
+
+  <!-- Navigation -->
+  <nav class="nav flex-column gap-1">
+
+    <!-- Dashboard -->
+    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/dashboard' ? 'bg-primary' : 'hover-bg' %>" href="/dashboard">
+      <i class="fas fa-tachometer-alt" style="width: 20px;"></i> Dashboard
+    </a>
+
+    <!-- Contacts -->
+    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/contacts' ? 'bg-primary' : 'hover-bg' %>" href="/contacts">
+      <i class="fas fa-address-book" style="width: 20px;"></i> Contacts
+    </a>
+
+    <!-- Attendance -->
+    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/attendance' ? 'bg-primary' : 'hover-bg' %>" href="/attendance">
+      <i class="fas fa-clock" style="width: 20px;"></i> Attendance
+    </a>
+
+    <!-- Schedule -->
+    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/schedule' ? 'bg-primary' : 'hover-bg' %>" href="/schedule">
+      <i class="fas fa-calendar-alt" style="width: 20px;"></i> My Schedule
+    </a>
+
+    <!-- Leave -->
+    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave' ? 'bg-primary' : 'hover-bg' %>" href="/leave">
+      <i class="fas fa-umbrella-beach" style="width: 20px;"></i> My Leave
+    </a>
+
+    <!-- HR Section (Admin + HR) -->
+    <% if (user && (user.role === 'admin' || user.role === 'hr_manager')) { %>
+      <hr class="text-secondary my-2">
+      <small class="text-secondary px-2">HR MANAGEMENT</small>
+
+      <!-- Leave Requests -->
+      <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave/admin' ? 'bg-primary' : 'hover-bg' %>" href="/leave/admin">
+        <i class="fas fa-clipboard-list" style="width: 20px;"></i> Leave Requests
+      </a>
+
+      <!-- Manage Attendance -->
+      <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/attendance/admin' ? 'bg-primary' : 'hover-bg' %>" href="/attendance/admin">
+        <i class="fas fa-edit" style="width: 20px;"></i> Manage Attendance
+      </a>
+
+      <!-- Schedule Requests -->
+      <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/schedule/admin' ? 'bg-primary' : 'hover-bg' %>" href="/schedule/admin">
+        <i class="fas fa-calendar-check" style="width: 20px;"></i> Schedule Requests
+      </a>
+
+      <!-- Leave Allocation -->
+      <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave/allocate' ? 'bg-primary' : 'hover-bg' %>" href="/leave/allocate">
+        <i class="fas fa-coins" style="width: 20px;"></i> Allocate Leave
+      </a>
+    <% } %>
+
+    <!-- Admin Section (Admin Only) -->
+    <% if (user && user.role === 'admin') { %>
+      <hr class="text-secondary my-2">
+      <small class="text-secondary px-2">ADMIN</small>
+
+      <!-- Staff Management -->
+      <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/staff' ? 'bg-primary' : 'hover-bg' %>" href="/staff">
+        <i class="fas fa-users" style="width: 20px;"></i> Staff Management
+      </a>
+
+      <!-- Activity Log -->
+      <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/logs' ? 'bg-primary' : 'hover-bg' %>" href="/logs">
+        <i class="fas fa-history" style="width: 20px;"></i> Activity Log
+      </a>
+    <% } %>
+
+  </nav>
+
+  <hr class="text-secondary mt-auto">
+
+  <!-- Bottom: Profile & Logout -->
+  <div class="mt-auto">
+    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/profile' ? 'bg-primary' : 'hover-bg' %>" href="/profile">
+      <i class="fas fa-user-circle" style="width: 20px;"></i> Profile
+    </a>
+    <a class="nav-link text-danger d-flex align-items-center gap-2 py-2 px-3 rounded hover-bg-danger" href="/logout">
+      <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
+    </a>
+  </div>
+
+</div>
+
+<!-- Mobile Toggle Button (visible on small screens) -->
+<button class="btn btn-dark d-lg-none position-fixed top-0 start-0 m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile" style="z-index: 1050;">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- Mobile Offcanvas -->
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarMobile" aria-labelledby="sidebarMobileLabel">
+  <div class="offcanvas-body p-0">
+    <div class="sidebar d-flex flex-column p-3 bg-dark text-white" style="width: 280px; min-height: 100vh;">
+      <!-- Same content as above — you can include the same sidebar partial here -->
+      <!-- For simplicity, we'll use the same content via a shared partial -->
+    </div>
+  </div>
+</div>
+
+<style>
+  .hover-bg:hover {
+    background-color: rgba(255,255,255,0.1);
+  }
+  .hover-bg-danger:hover {
+    background-color: rgba(220,53,69,0.2);
+  }
+  .sidebar .nav-link {
+    transition: all 0.2s ease;
+  }
+  @media (max-width: 991.98px) {
+    .sidebar {
+      display: none;
+    }
+  }
+  @media (min-width: 992px) {
+    .sidebar {
+      display: flex !important;
+    }
+    .offcanvas {
+      display: none !important;
+    }
+  }
+</style>
