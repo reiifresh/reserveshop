@@ -117,7 +117,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     // ─── Total Staff (active only) ───
     const [staffCount] = await pool.query(
       `SELECT COUNT(*) as count FROM users WHERE id != ? AND deleted_at IS NULL`,
-      [req.session.userId]
+      [req.session.userId])
 
 
 
