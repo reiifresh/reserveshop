@@ -153,10 +153,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       ORDER BY hours_lacking DESC
     `);
 
-    // ─── Pending Schedule & Leave Requests ───
-    let pendingSchedule = 0;
-    let pendingLeave = 0;
-    // ─── Pending Schedule Requests ───
+   
     // ─── Pending Schedule & Leave Requests ───
     let pendingSchedule = 0;
     let pendingLeave = 0;
