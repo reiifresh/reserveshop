@@ -111,13 +111,13 @@ router.get('/schedule/admin', isHR, async (req, res) => {
 
 
 
-// ─── ADMIN: Approve / Reject Request ───
+// ─── ADMIN/HR: Approve/Reject Schedule Request ───
 router.post('/schedule/admin/action', isHR, async (req, res) => {
   try {
     const { request_id, action } = req.body;
     const adminId = req.session.userId;
+    const adminRole = req.session.role;
 
-    // Get the request details
     const [requestRows] = await pool.query(
       `SELECT * FROM schedule_requests WHERE id = ?`,
       [request_id]
@@ -129,8 +129,26 @@ router.post('/schedule/admin/action', isHR, async (req, res) => {
       return res.redirect('/schedule/admin');
     }
 
+    // ─── SELF-APPROVAL CHECK (ADD THIS) ───
+    if (request.staff_id === adminId) {
+      req.session.message = '⚠️ You cannot approve your own schedule request.';
+      return res.redirect('/schedule/admin');
+    }
+
+    // ─── HR REQUESTS: ONLY ADMIN CAN APPROVE ───
+    const [requesterRows] = await pool.query(
+      `SELECT role FROM users WHERE id = ?`,
+      [request.staff_id]
+    );
+    const requesterRole = requesterRows[0]?.role;
+
+    if (requesterRole === 'hr_manager' && adminRole !== 'admin') {
+      req.session.message = '⚠️ Only Admin can approve HR schedule requests.';
+      return res.redirect('/schedule/admin');
+    }
+
+    // ─── APPROVE LOGIC ───
     if (action === 'approve') {
-      // Update request status
       await pool.query(
         `UPDATE schedule_requests 
          SET status = 'approved', approved_by = ?, approved_at = NOW()
@@ -141,18 +159,38 @@ router.post('/schedule/admin/action', isHR, async (req, res) => {
       // Generate work days for the month
       await generateWorkDays(request.staff_id, request.schedule_type, request.month_year);
 
-      req.session.message = `✅ Approved ${request.schedule_type} for ${request.staff_id}.`;
-    } else if (action === 'reject') {
-      await pool.query(
-        `UPDATE schedule_requests SET status = 'rejected' WHERE id = ?`,
-        [request_id]
+      await logActivity(
+        req.session.userId,
+        req.session.email,
+        'SCHEDULE_APPROVED',
+        `Approved ${request.schedule_type} schedule for ${request.staff_id}`,
+        req
       );
-      req.session.message = `❌ Rejected request.`;
+
+      req.session.message = `✅ Schedule request approved.`;
+    }
+
+    // ─── REJECT LOGIC ───
+    else if (action === 'reject') {
+      await pool.query(
+        `UPDATE schedule_requests SET status = 'rejected', approved_by = ? WHERE id = ?`,
+        [adminId, request_id]
+      );
+
+      await logActivity(
+        req.session.userId,
+        req.session.email,
+        'SCHEDULE_REJECTED',
+        `Rejected schedule request for ${request.staff_id}`,
+        req
+      );
+
+      req.session.message = `❌ Schedule request rejected.`;
     }
 
     res.redirect('/schedule/admin');
   } catch (err) {
-    console.error("❌ Admin action error:", err);
+    console.error("❌ Admin schedule action error:", err);
     req.session.message = '❌ Failed to process action.';
     res.redirect('/schedule/admin');
   }
