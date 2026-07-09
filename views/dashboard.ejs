@@ -79,6 +79,29 @@
     </div>
   <% } %>
 
+  <!-- Pending Requests Widget (Admin/HR only) -->
+  <% if (isAdmin || user.role === 'hr_manager') { %>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <a href="/leave/admin" class="text-decoration-none">
+          <div class="card card-shadow border-0 h-100">
+            <div class="card-body text-center py-3">
+              <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
+              <h4 class="mb-0"><%= pendingRequests %></h4>
+              <p class="text-muted small">Pending Requests</p>
+              <% if (pendingSchedule > 0 || pendingLeave > 0) { %>
+                <small class="text-muted">
+                  <%= pendingSchedule > 0 ? pendingSchedule + ' schedule' : '' %>
+                  <%= pendingSchedule > 0 && pendingLeave > 0 ? ' + ' : '' %>
+                  <%= pendingLeave > 0 ? pendingLeave + ' leave' : '' %>
+                </small>
+              <% } %>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  <% } %>
 
 
 
