@@ -305,6 +305,12 @@ router.post('/leave/allocate', isHR, async (req, res) => {
       return res.redirect('/leave/allocate');
     }
 
+    // ─── SELF-ALLOCATION CHECK (ADD THIS) ───
+    if (parseInt(staff_id) === req.session.userId) {
+      req.session.message = '⚠️ You cannot allocate leave credits to yourself.';
+      return res.redirect('/leave/allocate');
+    }
+
     // ─── MAX CAP CHECK ───
     const MAX_DAYS = 30;
     if (days > MAX_DAYS) {
@@ -312,32 +318,19 @@ router.post('/leave/allocate', isHR, async (req, res) => {
       return res.redirect('/leave/allocate');
     }
 
-    // Check if balance exists
-    const [existing] = await pool.query(
-      `SELECT * FROM leave_balances 
-       WHERE staff_id = ? AND leave_type = ? AND year = ?`,
-      [staff_id, leave_type, year]
+    // ─── HR REQUESTS: ONLY ADMIN CAN ALLOCATE TO HR ───
+    const [targetUserRows] = await pool.query(
+      `SELECT role FROM users WHERE id = ?`,
+      [staff_id]
     );
+    const targetRole = targetUserRows[0]?.role;
 
-    if (existing.length > 0) {
-      // Update existing balance
-      await pool.query(
-        `UPDATE leave_balances 
-         SET total_days = ?, remaining_days = total_days - used_days
-         WHERE staff_id = ? AND leave_type = ? AND year = ?`,
-        [days, staff_id, leave_type, year]
-      );
-    } else {
-      // Insert new balance
-      await pool.query(
-        `INSERT INTO leave_balances (staff_id, leave_type, total_days, remaining_days, year)
-         VALUES (?, ?, ?, ?, ?)`,
-        [staff_id, leave_type, days, days, year]
-      );
+    if (targetRole === 'hr_manager' && req.session.role !== 'admin') {
+      req.session.message = '⚠️ Only Admin can allocate leave to HR staff.';
+      return res.redirect('/leave/allocate');
     }
 
-    req.session.message = `✅ Allocated ${days} ${leave_type} days to staff member.`;
-    res.redirect('/leave/allocate');
+    // ... rest of the allocation logic
   } catch (err) {
     console.error("❌ Allocate error:", err);
     req.session.message = '❌ Failed to allocate leave.';
