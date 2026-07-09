@@ -121,30 +121,17 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     );
     const totalStaff = staffCount[0].count;
 
-    // ─── Hours Balance (current week) ───
     const [hoursBalance] = await pool.query(`
       SELECT 
         u.id,
         u.full_name,
         u.email,
         COALESCE(SUM(a.hours_worked), 0) as actual_hours,
-        CASE 
-          WHEN s.schedule_type = '4_day_week' THEN 32
-          WHEN s.schedule_type = '3_on_1_off' THEN 32
-          WHEN s.schedule_type = 'flexi' THEN 40
-          ELSE 40
-        END as target_hours,
-        CASE 
-          WHEN s.schedule_type = '4_day_week' THEN 32
-          WHEN s.schedule_type = '3_on_1_off' THEN 32
-          WHEN s.schedule_type = 'flexi' THEN 40
-          ELSE 40
-        END - COALESCE(SUM(a.hours_worked), 0) as hours_lacking
+        40 as target_hours,
+        40 - COALESCE(SUM(a.hours_worked), 0) as hours_lacking
       FROM users u
       LEFT JOIN attendance a ON u.id = a.staff_id 
         AND a.date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) AND CURDATE()
-      LEFT JOIN work_schedules s ON u.id = s.staff_id 
-        AND s.month_year = DATE_FORMAT(CURDATE(), '%Y-%m-01')
       WHERE u.deleted_at IS NULL 
         AND u.role != 'admin'
         AND u.role != 'hr_manager'
