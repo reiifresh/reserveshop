@@ -1,40 +1,44 @@
-<!-- Sidebar -->
-<div class="sidebar d-flex flex-column p-3 bg-dark text-white" style="width: 280px; min-height: 100vh; position: fixed; top: 0; left: 0; z-index: 1000;">
+<div class="sidebar d-flex flex-column p-3 bg-dark text-white" id="sidebar">
 
-  <!-- Brand -->
-  <div class="d-flex align-items-center mb-4">
-    <i class="fas fa-compass fa-2x text-primary me-2"></i>
-    <span class="fs-4 fw-bold">Reserve Shop</span>
+  <!-- Brand + Collapse Toggle -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-rocket fa-2x text-primary me-2"></i>
+      <span class="fs-4 fw-bold" id="brandText">CRM Pro</span>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary" type="button" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" title="Collapse Sidebar">
+      <i class="fas fa-chevron-left"></i>
+    </button>
   </div>
 
   <hr class="text-secondary">
 
   <!-- Navigation -->
-  <nav class="nav flex-column gap-1">
-
-    <!-- Dashboard -->
-    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/dashboard' ? 'bg-primary' : 'hover-bg' %>" href="/dashboard">
-      <i class="fas fa-tachometer-alt" style="width: 20px;"></i> Dashboard
+  <nav class="nav flex-column gap-1" id="sidebarNav">
+    <!-- Each link must have a <span> around the text -->
+    <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded" href="/dashboard">
+      <i class="fas fa-tachometer-alt" style="width: 20px;"></i>
+      <span>Dashboard</span>
     </a>
 
     <!-- Contacts -->
     <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/contacts' ? 'bg-primary' : 'hover-bg' %>" href="/contacts">
-      <i class="fas fa-address-book" style="width: 20px;"></i> Contacts
+      <i class="fas fa-address-book" style="width: 20px;"></i> <span>Contacts</span> 
     </a>
 
     <!-- Attendance -->
     <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/attendance' ? 'bg-primary' : 'hover-bg' %>" href="/attendance">
-      <i class="fas fa-clock" style="width: 20px;"></i> Attendance
+      <i class="fas fa-clock" style="width: 20px;"></i> <span>Attendance</span> 
     </a>
 
     <!-- Schedule -->
     <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/schedule' ? 'bg-primary' : 'hover-bg' %>" href="/schedule">
-      <i class="fas fa-calendar-alt" style="width: 20px;"></i> My Schedule
+      <i class="fas fa-calendar-alt" style="width: 20px;"></i> <span>My Schedule</span> 
     </a>
 
     <!-- Leave -->
     <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave' ? 'bg-primary' : 'hover-bg' %>" href="/leave">
-      <i class="fas fa-umbrella-beach" style="width: 20px;"></i> My Leave
+      <i class="fas fa-umbrella-beach" style="width: 20px;"></i> <span>My Leave</span> 
     </a>
 
     <!-- HR Section (Admin + HR) -->
@@ -44,22 +48,22 @@
 
       <!-- Leave Requests -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave/admin' ? 'bg-primary' : 'hover-bg' %>" href="/leave/admin">
-        <i class="fas fa-clipboard-list" style="width: 20px;"></i> Leave Requests
+        <i class="fas fa-clipboard-list" style="width: 20px;"></i> <span>Leave Requests</span> 
       </a>
 
       <!-- Manage Attendance -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/attendance/admin' ? 'bg-primary' : 'hover-bg' %>" href="/attendance/admin">
-        <i class="fas fa-edit" style="width: 20px;"></i> Manage Attendance
+        <i class="fas fa-edit" style="width: 20px;"></i> <span>Manage Attendance</span> 
       </a>
 
       <!-- Schedule Requests -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/schedule/admin' ? 'bg-primary' : 'hover-bg' %>" href="/schedule/admin">
-        <i class="fas fa-calendar-check" style="width: 20px;"></i> Schedule Requests
+        <i class="fas fa-calendar-check" style="width: 20px;"></i> <span>Schedule Requests</span> 
       </a>
 
       <!-- Leave Allocation -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave/allocate' ? 'bg-primary' : 'hover-bg' %>" href="/leave/allocate">
-        <i class="fas fa-coins" style="width: 20px;"></i> Allocate Leave
+        <i class="fas fa-coins" style="width: 20px;"></i> <span>Leave - Not yet Avail</span> 
       </a>
     <% } %>
 
@@ -70,12 +74,12 @@
 
       <!-- Staff Management -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/staff' ? 'bg-primary' : 'hover-bg' %>" href="/staff">
-        <i class="fas fa-users" style="width: 20px;"></i> Staff Management
+        <i class="fas fa-users" style="width: 20px;"></i> <span>Staff Management</span> 
       </a>
 
       <!-- Activity Log -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/logs' ? 'bg-primary' : 'hover-bg' %>" href="/logs">
-        <i class="fas fa-history" style="width: 20px;"></i> Activity Log
+        <i class="fas fa-history" style="width: 20px;"></i> <span>Activity Log</span> 
       </a>
     <% } %>
 
@@ -86,10 +90,10 @@
   <!-- Bottom: Profile & Logout -->
   <div class="mt-auto">
     <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/profile' ? 'bg-primary' : 'hover-bg' %>" href="/profile">
-      <i class="fas fa-user-circle" style="width: 20px;"></i> Profile
+      <i class="fas fa-user-circle" style="width: 20px;"></i> <span>Profile</span> 
     </a>
     <a class="nav-link text-danger d-flex align-items-center gap-2 py-2 px-3 rounded hover-bg-danger" href="/logout">
-      <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
+      <i class="fas fa-sign-out-alt" style="width: 20px;"></i> <span>Logout</span> 
     </a>
   </div>
 
@@ -103,7 +107,7 @@
 <!-- Mobile Offcanvas -->
 <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarMobile" aria-labelledby="sidebarMobileLabel">
   <div class="offcanvas-body p-0">
-    <div class="sidebar d-flex flex-column p-3 bg-dark text-white" style="width: 280px; min-height: 100vh;">
+    <div class="sidebar d-flex flex-column p-3 bg-dark text-white" id="sidebar">
       <!-- Same content as above — you can include the same sidebar partial here -->
       <!-- For simplicity, we'll use the same content via a shared partial -->
     </div>

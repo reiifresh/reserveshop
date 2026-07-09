@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Pro</title>
+  <title>Reserve Shop</title>
 
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -73,6 +73,61 @@
         display: none !important;
       }
     }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 280px;
+      min-height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      transition: width 0.3s ease;
+    }
+
+    /* Collapsed state */
+    .sidebar.collapsed {
+      width: 70px !important;
+    }
+
+    .sidebar.collapsed #brandText {
+      display: none;
+    }
+    .sidebar.collapsed .nav-link span {
+      display: none;
+    }
+    .sidebar.collapsed .nav-link i {
+      margin-right: 0 !important;
+      font-size: 1.2rem;
+    }
+    .sidebar.collapsed .sidebar-section-label {
+      display: none;
+    }
+    .sidebar.collapsed hr {
+      display: none;
+    }
+    .sidebar.collapsed .sidebar-footer-text {
+      display: none;
+    }
+
+    /* Main content adjustment */
+    .main-content {
+      margin-left: 280px;
+      padding: 20px;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .sidebar.collapsed ~ .main-content {
+      margin-left: 70px !important;
+    }
+
+    /* No sidebar for login/register pages */
+    .no-sidebar {
+      margin-left: 0 !important;
+    }
+
+    
   </style>
 </head>
 <body>
