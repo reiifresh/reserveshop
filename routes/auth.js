@@ -117,9 +117,9 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     // ─── Total Staff (active only) ───
     const [staffCount] = await pool.query(
       `SELECT COUNT(*) as count FROM users WHERE id != ? AND deleted_at IS NULL`,
-      [req.session.userId])
-
-
+      [req.session.userId]  // 👈 NO SEMICOLON HERE — just closing )
+    );
+    const totalStaff = staffCount[0].count;
 
     // ─── Hours Balance (current week) ───
     const [hoursBalance] = await pool.query(`
@@ -152,9 +152,10 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       HAVING hours_lacking > 2
       ORDER BY hours_lacking DESC
     `);
-    
-    const totalStaff = staffCount[0].count;
 
+    // ─── Pending Schedule & Leave Requests ───
+    let pendingSchedule = 0;
+    let pendingLeave = 0;
     // ─── Pending Schedule Requests ───
     // ─── Pending Schedule & Leave Requests ───
     let pendingSchedule = 0;
