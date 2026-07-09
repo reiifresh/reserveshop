@@ -118,7 +118,41 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     const [staffCount] = await pool.query(
       `SELECT COUNT(*) as count FROM users WHERE id != ? AND deleted_at IS NULL`,
       [req.session.userId]
-    );
+
+
+
+    // ─── Hours Balance (current week) ───
+    const [hoursBalance] = await pool.query(`
+      SELECT 
+        u.id,
+        u.full_name,
+        u.email,
+        COALESCE(SUM(a.hours_worked), 0) as actual_hours,
+        CASE 
+          WHEN s.schedule_type = '4_day_week' THEN 32
+          WHEN s.schedule_type = '3_on_1_off' THEN 32
+          WHEN s.schedule_type = 'flexi' THEN 40
+          ELSE 40
+        END as target_hours,
+        CASE 
+          WHEN s.schedule_type = '4_day_week' THEN 32
+          WHEN s.schedule_type = '3_on_1_off' THEN 32
+          WHEN s.schedule_type = 'flexi' THEN 40
+          ELSE 40
+        END - COALESCE(SUM(a.hours_worked), 0) as hours_lacking
+      FROM users u
+      LEFT JOIN attendance a ON u.id = a.staff_id 
+        AND a.date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) AND CURDATE()
+      LEFT JOIN work_schedules s ON u.id = s.staff_id 
+        AND s.month_year = DATE_FORMAT(CURDATE(), '%Y-%m-01')
+      WHERE u.deleted_at IS NULL 
+        AND u.role != 'admin'
+        AND u.role != 'hr_manager'
+      GROUP BY u.id
+      HAVING hours_lacking > 2
+      ORDER BY hours_lacking DESC
+    `);
+    
     const totalStaff = staffCount[0].count;
 
     // ─── Pending Schedule Requests ───
@@ -261,37 +295,7 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 
-// ─── Hours Balance (current week) ───
-const [hoursBalance] = await pool.query(`
-  SELECT 
-    u.id,
-    u.full_name,
-    u.email,
-    COALESCE(SUM(a.hours_worked), 0) as actual_hours,
-    CASE 
-      WHEN s.schedule_type = '4_day_week' THEN 32
-      WHEN s.schedule_type = '3_on_1_off' THEN 32
-      WHEN s.schedule_type = 'flexi' THEN 40
-      ELSE 40
-    END as target_hours,
-    CASE 
-      WHEN s.schedule_type = '4_day_week' THEN 32
-      WHEN s.schedule_type = '3_on_1_off' THEN 32
-      WHEN s.schedule_type = 'flexi' THEN 40
-      ELSE 40
-    END - COALESCE(SUM(a.hours_worked), 0) as hours_lacking
-  FROM users u
-  LEFT JOIN attendance a ON u.id = a.staff_id 
-    AND a.date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) AND CURDATE()
-  LEFT JOIN work_schedules s ON u.id = s.staff_id 
-    AND s.month_year = DATE_FORMAT(CURDATE(), '%Y-%m-01')
-  WHERE u.deleted_at IS NULL 
-    AND u.role != 'admin'
-    AND u.role != 'hr_manager'
-  GROUP BY u.id
-  HAVING hours_lacking > 2
-  ORDER BY hours_lacking DESC
-`);
+
 
 
 // --- ROUTE: Reset Password Page (Click the link) ---
