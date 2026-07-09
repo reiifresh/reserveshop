@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <h2><i class="fas fa-hourglass-half text-danger me-2"></i>Undertime Report</h2>
+    <hr>
+  </div>
+</div>
+
+<% if (hoursBalance.length === 0) { %>
+  <div class="alert alert-success">
+    <i class="fas fa-check-circle me-2"></i>All staff are on track this week!
+  </div>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover shadow-sm bg-white rounded">
+      <thead class="table-dark">
+        <tr>
+          <th>Staff</th>
+          <th>Email</th>
+          <th>Actual Hours</th>
+          <th>Target Hours</th>
+          <th>Hours Lacking</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% hoursBalance.forEach(staff => { %>
+          <tr>
+            <td><%= staff.full_name || 'N/A' %></td>
+            <td><%= staff.email %></td>
+            <td><%= staff.actual_hours %></td>
+            <td><%= staff.target_hours %></td>
+            <td class="text-danger"><strong><%= staff.hours_lacking %></strong></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

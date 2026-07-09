@@ -104,6 +104,39 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+// ─── Undertime Staff Report ───
+router.get('/undertime', isAdmin, async (req, res) => {
+  try {
+    const [hoursBalance] = await pool.query(`
+      SELECT 
+        u.id,
+        u.full_name,
+        u.email,
+        COALESCE(SUM(a.hours_worked), 0) as actual_hours,
+        40 as target_hours,
+        40 - COALESCE(SUM(a.hours_worked), 0) as hours_lacking
+      FROM users u
+      LEFT JOIN attendance a ON u.id = a.staff_id 
+        AND a.date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) AND CURDATE()
+      WHERE u.deleted_at IS NULL 
+        AND u.role != 'admin'
+        AND u.role != 'hr_manager'
+      GROUP BY u.id
+      HAVING hours_lacking > 2
+      ORDER BY hours_lacking DESC
+    `);
+
+    res.render('undertime', {
+      user: req.session,
+      hoursBalance: hoursBalance
+    });
+  } catch (err) {
+    console.error("❌ Undertime error:", err);
+    res.send("Error loading undertime report.");
+  }
+});
+
 // ─── ROUTE: Dashboard (Protected) ───
 router.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
