@@ -59,20 +59,24 @@
     </div>
   </div>
 
+</div>
+
   
-  <!-- Undertime Widget (Admin/HR only) -->
+  <!-- Undertime Widget (Admin/HR only) - Separate Row -->
   <% if (isAdmin || user.role === 'hr_manager') { %>
-    <a href="/undertime" class="text-decoration-none">
-      <div class="col">
-        <div class="card card-shadow border-0 h-100">
-          <div class="card-body text-center py-3">
-            <i class="fas fa-hourglass-half fa-2x text-danger mb-1"></i>
-            <h4 class="mb-0"><%= hoursBalance ? hoursBalance.length : 0 %></h4>
-            <p class="text-muted small">Undertime Staff</p>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <a href="/undertime" class="text-decoration-none">
+          <div class="card card-shadow border-0 h-100">
+            <div class="card-body text-center py-3">
+              <i class="fas fa-hourglass-half fa-2x text-danger mb-1"></i>
+              <h4 class="mb-0"><%= hoursBalance ? hoursBalance.length : 0 %></h4>
+              <p class="text-muted small">Undertime Staff</p>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
-    </a>
+    </div>
   <% } %>
 
 
