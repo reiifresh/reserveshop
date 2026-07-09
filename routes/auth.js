@@ -94,7 +94,7 @@ router.post('/login', async (req, res) => {
     req.session.userId = user.id;
     req.session.email = user.email;
     req.session.role = user.role;
-    req.session.fullName = user.full_name || 'User';
+    req.session.full_name = user.full_name || user.email || 'User';
 
     res.redirect('/dashboard');
 
