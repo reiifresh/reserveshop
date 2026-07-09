@@ -44,7 +44,7 @@
     <!-- HR Section (Admin + HR) -->
     <% if (user && (user.role === 'admin' || user.role === 'hr_manager')) { %>
       <hr class="text-secondary my-2">
-      <small class="text-secondary px-2"><span>HR Management</span></small>
+      <small class="text-secondary px-2 sidebar-section-label">HR Management</small>
 
       <!-- Leave Requests -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave/admin' ? 'bg-primary' : 'hover-bg' %>" href="/leave/admin">
@@ -70,7 +70,7 @@
     <!-- Admin Section (Admin Only) -->
     <% if (user && user.role === 'admin') { %>
       <hr class="text-secondary my-2">
-      <small class="text-secondary px-2"><span>Admin Access</span></small>
+      <small class="text-secondary px-2 sidebar-section-label">ADMIN</small>
 
       <!-- Staff Management -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/staff' ? 'bg-primary' : 'hover-bg' %>" href="/staff">

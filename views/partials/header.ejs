@@ -59,6 +59,28 @@
     }
     .sidebar .nav-link {
       transition: all 0.2s ease;
+      border-radius: 6px;
+      color: #e5e7eb !important;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: rgba(255,255,255,0.1) !important;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link.bg-primary {
+      background-color: #4f46e5 !important;
+      color: #ffffff !important;
+    }
+
+    /* When collapsed, keep active link visible but cleaner */
+    .sidebar.collapsed .nav-link.bg-primary {
+      background-color: #4f46e5 !important;
+      border-radius: 6px;
+    }
+
+    .sidebar.collapsed .nav-link:hover {
+      background-color: rgba(255,255,255,0.1) !important;
     }
     @media (max-width: 991.98px) {
       .sidebar {
@@ -74,7 +96,7 @@
       }
     }
 
-    /* ─── SIDEBAR ─── */
+        /* ─── SIDEBAR ─── */
     .sidebar {
       width: 280px;
       min-height: 100vh;
@@ -83,6 +105,8 @@
       left: 0;
       z-index: 1000;
       transition: width 0.3s ease;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
     /* Collapsed state */
@@ -93,19 +117,25 @@
     .sidebar.collapsed #brandText {
       display: none;
     }
+
     .sidebar.collapsed .nav-link span {
       display: none;
     }
+
     .sidebar.collapsed .nav-link i {
       margin-right: 0 !important;
       font-size: 1.2rem;
     }
+
+    /* 👇 FIX: Hide section labels and HR */
     .sidebar.collapsed .sidebar-section-label {
-      display: none;
+      display: none !important;
     }
+
     .sidebar.collapsed hr {
-      display: none;
+      display: none !important;
     }
+
     .sidebar.collapsed .sidebar-footer-text {
       display: none;
     }
@@ -122,12 +152,11 @@
       margin-left: 70px !important;
     }
 
-    /* No sidebar for login/register pages */
     .no-sidebar {
       margin-left: 0 !important;
     }
 
-    
+
   </style>
 </head>
 <body>
