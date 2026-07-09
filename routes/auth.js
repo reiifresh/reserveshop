@@ -187,7 +187,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     res.render('dashboard', {
       user: req.session,
       userEmail: req.session.email,
-      fullName: req.session.full_name || 'Admin',
+      fullName: req.session.full_name || req.session.email || 'Admin',
       totalContacts: totalContacts,
       totalStaff: totalStaff,
       today: today,
