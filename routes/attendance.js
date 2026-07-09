@@ -87,8 +87,12 @@ router.post('/attendance/check-out', isAuthenticated, async (req, res) => {
   try {
     const staffId = req.session.userId;
 
+    // 👇 Find the most recent active record (works across midnight)
     const [record] = await pool.query(
-      `SELECT * FROM attendance WHERE staff_id = ? AND date = CURDATE() AND check_out IS NULL`,
+      `SELECT * FROM attendance 
+       WHERE staff_id = ? AND check_out IS NULL 
+       ORDER BY date DESC, check_in DESC 
+       LIMIT 1`,
       [staffId]
     );
 
@@ -119,10 +123,12 @@ router.post('/attendance/undo', isAuthenticated, async (req, res) => {
   try {
     const staffId = req.session.userId;
 
+    // 👇 Find the most recent clocked-out record
     const [record] = await pool.query(
       `SELECT id, check_out, created_at FROM attendance 
-       WHERE staff_id = ? AND date = CURDATE() AND check_out IS NOT NULL
-       ORDER BY id DESC LIMIT 1`,
+       WHERE staff_id = ? AND check_out IS NOT NULL
+       ORDER BY date DESC, check_out DESC 
+       LIMIT 1`,
       [staffId]
     );
 
