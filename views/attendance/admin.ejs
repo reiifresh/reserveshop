@@ -21,6 +21,7 @@
         <th>Check Out</th>
         <th>Hours</th>
         <th>Actions</th>
+        <th>Hours Lacking</th>
       </tr>
     </thead>
     <tbody>
@@ -37,6 +38,13 @@
             </td>
             <td>
               <input type="number" step="0.5" name="hours_worked" value="<%= record.hours_worked || '' %>" class="form-control form-control-sm" style="width:80px;">
+            </td>
+            <td>
+              <% if (record.hours_lacking > 0) { %>
+                <span class="text-danger"><%= record.hours_lacking.toFixed(1) %> hrs</span>
+              <% } else { %>
+                <span class="text-success">0</span>
+              <% } %>
             </td>
             <td>
               <button type="submit" class="btn btn-primary btn-sm">

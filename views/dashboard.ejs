@@ -73,6 +73,34 @@
   </div>
 </div>
 
+<!-- Hours Balance Widget -->
+<div class="col-md-3 col-6">
+  <div class="card card-shadow border-0 h-100">
+    <div class="card-body text-center py-3">
+      <i class="fas fa-hourglass-half fa-2x text-danger mb-1"></i>
+      <h4 class="mb-0"><%= hoursBalance.length %></h4>
+      <p class="text-muted small">Undertime Staff</p>
+    </div>
+  </div>
+</div>
+
+<!-- Staff Personal Hours Balance -->
+<div class="card card-shadow border-0 mt-3">
+  <div class="card-body">
+    <h6><i class="fas fa-hourglass-half me-2"></i>Your Hours This Week</h6>
+    <div class="progress" style="height: 25px;">
+      <div class="progress-bar bg-success" role="progressbar" 
+           style="width: <%= (actualHours / targetHours * 100) %>%;">
+        <%= actualHours %> / <%= targetHours %> hours
+      </div>
+    </div>
+    <% if (actualHours < targetHours) { %>
+      <small class="text-danger">⚠️ You're <%= targetHours - actualHours %> hours short this week</small>
+    <% } else { %>
+      <small class="text-success">✅ You're on track or ahead!</small>
+    <% } %>
+  </div>
+</div>
 
 
 <!-- Main Two-Column Layout -->
