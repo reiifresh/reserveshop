@@ -3,7 +3,7 @@
   <!-- Brand + Collapse Toggle -->
   <div class="d-flex align-items-center justify-content-between mb-4">
     <div class="d-flex align-items-center">
-      <i class="fas fa-rocket fa-2x text-primary me-2"></i>
+      <i class="fas fa-compass fa-2x text-primary me-2"></i>
       <span class="fs-4 fw-bold" id="brandText">Reserve Shop</span>
     </div>
     <button class="btn btn-sm btn-outline-secondary" type="button" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" title="Collapse Sidebar">
@@ -44,7 +44,7 @@
     <!-- HR Section (Admin + HR) -->
     <% if (user && (user.role === 'admin' || user.role === 'hr_manager')) { %>
       <hr class="text-secondary my-2">
-      <small class="text-secondary px-2">HR MANAGEMENT</small>
+      <small class="text-secondary px-2"><span>HR Management</span></small>
 
       <!-- Leave Requests -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/leave/admin' ? 'bg-primary' : 'hover-bg' %>" href="/leave/admin">
@@ -70,7 +70,7 @@
     <!-- Admin Section (Admin Only) -->
     <% if (user && user.role === 'admin') { %>
       <hr class="text-secondary my-2">
-      <small class="text-secondary px-2">ADMIN</small>
+      <small class="text-secondary px-2"><span>Admin Access</span></small>
 
       <!-- Staff Management -->
       <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded <%= currentPath === '/staff' ? 'bg-primary' : 'hover-bg' %>" href="/staff">
