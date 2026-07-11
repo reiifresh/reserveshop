@@ -17,6 +17,7 @@ const logsRoutes = require('./routes/logs');
 const attendanceRoutes = require('./routes/attendance');
 const scheduleRoutes = require('./routes/schedule');
 const leaveRoutes = require('./routes/leave');
+const reportsRoutes = require('./routes/reports');
 
 app.set('trust proxy', true);
 
@@ -62,6 +63,7 @@ app.use('/', logsRoutes);
 app.use('/', attendanceRoutes);
 app.use('/', scheduleRoutes);
 app.use('/', leaveRoutes);
+app.use('/', reportsRoutes);
 
 // ─── CLEANUP LOGS ENDPOINT ───
 app.get('/api/clean-logs', async (req, res) => {
