@@ -16,158 +16,189 @@
 </div>
 
 
-<!-- Row 1: Main Stats (Everyone) -->
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-4">
-  <!-- Contacts -->
-  <div class="col">
-    <div class="card card-shadow border-0 h-100">
-      <div class="card-body text-center py-3">
-        <i class="fas fa-address-book fa-2x text-primary mb-1"></i>
-        <h4 class="mb-0"><%= totalContacts %></h4>
-        <p class="text-muted small">Contacts</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Staff -->
-  <div class="col">
-    <div class="card card-shadow border-0 h-100">
-      <div class="card-body text-center py-3">
-        <i class="fas fa-users fa-2x text-success mb-1"></i>
-        <h4 class="mb-0"><%= totalStaff %></h4>
-        <p class="text-muted small">Staff</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Today's Status -->
-  <div class="col">
-    <div class="card card-shadow border-0 h-100">
-      <div class="card-body text-center py-3">
-        <i class="fas fa-clock fa-2x text-warning mb-1"></i>
-        <h4 class="mb-0">
-          <% if (today && today.check_in && !today.check_out) { %>
-            <span class="text-success">●</span> Clocked In
-          <% } else if (today && today.check_in && today.check_out) { %>
-            <span class="text-secondary">●</span> Clocked Out
-          <% } else { %>
-            <span class="text-danger">●</span> Not Started
-          <% } %>
-        </h4>
-        <p class="text-muted small">Today's Status</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-  
-  <!-- Row 2: Admin/HR Widgets (Undertime + Pending Requests) -->
-<% if (isAdmin || user.role === 'hr_manager') { %>
-  <div class="row row-cols-1 row-cols-sm-2 g-3 mb-4">
-    <!-- Undertime Staff -->
-    <div class="col">
-      <a href="/undertime" class="text-decoration-none">
+    <!-- Row 1: Main Stats (Everyone) -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-4">
+      <!-- Contacts -->
+      <div class="col">
         <div class="card card-shadow border-0 h-100">
           <div class="card-body text-center py-3">
-            <i class="fas fa-hourglass-half fa-2x text-danger mb-1"></i>
-            <h4 class="mb-0"><%= hoursBalance ? hoursBalance.length : 0 %></h4>
-            <p class="text-muted small">Undertime Staff</p>
+            <i class="fas fa-address-book fa-2x text-primary mb-1"></i>
+            <h4 class="mb-0"><%= totalContacts %></h4>
+            <p class="text-muted small">Contacts</p>
           </div>
         </div>
-      </a>
-    </div>
+      </div>
 
-    <!-- Pending Requests -->
-    <div class="col">
-      <a href="/leave/admin" class="text-decoration-none">
+      <!-- Staff -->
+      <div class="col">
         <div class="card card-shadow border-0 h-100">
           <div class="card-body text-center py-3">
-            <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
-            <h4 class="mb-0"><%= pendingRequests %></h4>
-            <p class="text-muted small">Pending Requests</p>
-            <% if (pendingSchedule > 0 || pendingLeave > 0) { %>
-              <small class="text-muted">
-                <%= pendingSchedule > 0 ? pendingSchedule + ' schedule' : '' %>
-                <%= pendingSchedule > 0 && pendingLeave > 0 ? ' + ' : '' %>
-                <%= pendingLeave > 0 ? pendingLeave + ' leave' : '' %>
-              </small>
+            <i class="fas fa-users fa-2x text-success mb-1"></i>
+            <h4 class="mb-0"><%= totalStaff %></h4>
+            <p class="text-muted small">Staff</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Status -->
+      <div class="col">
+        <div class="card card-shadow border-0 h-100">
+          <div class="card-body text-center py-3">
+            <i class="fas fa-clock fa-2x text-warning mb-1"></i>
+            <h4 class="mb-0">
+              <% if (today && today.check_in && !today.check_out) { %>
+                <span class="text-success">●</span> Clocked In
+              <% } else if (today && today.check_in && today.check_out) { %>
+                <span class="text-secondary">●</span> Clocked Out
+              <% } else { %>
+                <span class="text-danger">●</span> Not Started
+              <% } %>
+            </h4>
+            <p class="text-muted small">Today's Status</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      
+      <!-- Row 2: Admin/HR Widgets (Undertime + Pending Requests) -->
+    <% if (isAdmin || user.role === 'hr_manager') { %>
+      <div class="row row-cols-1 row-cols-sm-2 g-3 mb-4">
+        <!-- Undertime Staff -->
+        <div class="col">
+          <a href="/undertime" class="text-decoration-none">
+            <div class="card card-shadow border-0 h-100">
+              <div class="card-body text-center py-3">
+                <i class="fas fa-hourglass-half fa-2x text-danger mb-1"></i>
+                <h4 class="mb-0"><%= hoursBalance ? hoursBalance.length : 0 %></h4>
+                <p class="text-muted small">Undertime Staff</p>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Pending Requests -->
+        <div class="col">
+          <a href="/leave/admin" class="text-decoration-none">
+            <div class="card card-shadow border-0 h-100">
+              <div class="card-body text-center py-3">
+                <i class="fas fa-clipboard-list fa-2x text-info mb-1"></i>
+                <h4 class="mb-0"><%= pendingRequests %></h4>
+                <p class="text-muted small">Pending Requests</p>
+                <% if (pendingSchedule > 0 || pendingLeave > 0) { %>
+                  <small class="text-muted">
+                    <%= pendingSchedule > 0 ? pendingSchedule + ' schedule' : '' %>
+                    <%= pendingSchedule > 0 && pendingLeave > 0 ? ' + ' : '' %>
+                    <%= pendingLeave > 0 ? pendingLeave + ' leave' : '' %>
+                  </small>
+                <% } %>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    <% } %>
+
+
+
+    <!-- Row 2: Today's Attendance + Quick Actions -->
+    <div class="row g-4 mb-4">
+      <!-- Left: Today's Attendance -->
+      <div class="col-md-6">
+        <div class="card card-shadow border-0 h-100">
+          <div class="card-header bg-transparent border-0 pt-3">
+            <h5 class="mb-0">
+              <i class="fas fa-clock text-primary me-2"></i>Today's Attendance
+              <span class="badge bg-secondary ms-2"><%= new Date().toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' }) %></span>
+            </h5>
+          </div>
+          <div class="card-body d-flex flex-column justify-content-center">
+            <% if (today && today.check_in) { %>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Check In: <strong><%= today.check_in %></strong></span>
+                <span>Check Out: <strong><%= today.check_out || '—' %></strong></span>
+                <span>Hours: <strong><%= today.hours_worked || 'In progress' %></strong></span>
+              </div>
+              <% if (!today.check_out) { %>
+                <form method="POST" action="/attendance/check-out" class="mt-2">
+                  <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Clock Out
+                  </button>
+                </form>
+              <% } %>
+            <% } else { %>
+              <p class="text-muted mb-2">You haven't clocked in today.</p>
+              <form method="POST" action="/attendance/check-in">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="fas fa-sign-in-alt me-1"></i>Clock In
+                </button>
+              </form>
             <% } %>
           </div>
         </div>
-      </a>
-    </div>
-  </div>
-<% } %>
-
-
-
-<!-- Main Two-Column Layout -->
-<div class="row g-4">
-
-  <!-- LEFT COLUMN -->
-  <div class="col-lg-8">
-
-    <!-- Attendance Widget -->
-    <div class="card card-shadow border-0 mb-4">
-      <div class="card-header bg-transparent border-0 pt-3">
-        <h5 class="mb-0">
-          <i class="fas fa-clock text-primary me-2"></i>Today's Attendance
-          <span class="badge bg-secondary ms-2"><%= new Date().toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' }) %></span>
-        </h5>
       </div>
-      <div class="card-body">
-        <% if (today && today.check_in) { %>
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span>Check In: <strong><%= today.check_in %></strong></span>
-            <span>Check Out: <strong><%= today.check_out || '—' %></strong></span>
-            <span>Hours: <strong><%= today.hours_worked || 'In progress' %></strong></span>
+
+      <!-- Right: Quick Actions -->
+      <div class="col-md-6">
+        <div class="card card-shadow border-0 h-100">
+          <div class="card-header bg-transparent border-0 pt-3">
+            <h5 class="mb-0">
+              <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+            </h5>
           </div>
-          <% if (!today.check_out) { %>
-            <form method="POST" action="/attendance/check-out" class="mt-2">
-              <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>Clock Out
-              </button>
-            </form>
+          <div class="card-body d-flex flex-column justify-content-center">
+            <div class="d-grid gap-2">
+              <a href="/contacts/add" class="btn btn-outline-primary">
+                <i class="fas fa-plus me-1"></i>Add Contact
+              </a>
+              <a href="/attendance" class="btn btn-outline-success">
+                <i class="fas fa-clock me-1"></i>View Attendance
+              </a>
+              <a href="/schedule" class="btn btn-outline-info">
+                <i class="fas fa-calendar-alt me-1"></i>My Schedule
+              </a>
+              <a href="/staff/add" class="btn btn-outline-secondary">
+                <i class="fas fa-user-plus me-1"></i>Add Staff
+              </a>
+              <a href="/leave" class="btn btn-outline-warning">
+                <i class="fas fa-umbrella-beach me-1"></i>My Leave
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <!-- LEFT COLUMN (col-lg-8) -->
+    <div class="col-lg-8">
+
+      <!-- Weekly Summary Chart -->
+      <div class="card card-shadow border-0 mb-4">
+        <div class="card-header bg-transparent border-0 pt-3">
+          <h5 class="mb-0">
+            <i class="fas fa-chart-bar text-success me-2"></i>Weekly Hours
+          </h5>
+        </div>
+        <div class="card-body">
+          <% if (weeklySummary.length === 0) { %>
+            <p class="text-muted">No attendance data this week.</p>
+          <% } else { %>
+            <div class="d-flex align-items-end justify-content-between" style="height: 150px;">
+              <% const maxHours = Math.max(...weeklySummary.map(d => d.hours_worked || 0), 1); %>
+              <% weeklySummary.forEach(day => { %>
+                <div class="text-center" style="flex:1;">
+                  <div style="height: <%= (day.hours_worked || 0) / maxHours * 120 %>px; width: 30px; background: <%= day.hours_worked ? '#4f46e5' : '#e5e7eb' %>; border-radius: 4px 4px 0 0; margin: 0 auto;"></div>
+                  <small class="text-muted"><%= day.date ? new Date(day.date).toLocaleDateString('en-PH', { weekday: 'short' }) : '—' %></small>
+                  <small class="d-block text-muted"><%= day.hours_worked || '0' %></small>
+                </div>
+              <% }) %>
+            </div>
           <% } %>
-        <% } else { %>
-          <p class="text-muted mb-2">You haven't clocked in today.</p>
-          <form method="POST" action="/attendance/check-in">
-            <button type="submit" class="btn btn-success btn-sm">
-              <i class="fas fa-sign-in-alt me-1"></i>Clock In
-            </button>
-          </form>
-        <% } %>
+        </div>
       </div>
-    </div>
 
-    <!-- Weekly Summary Chart -->
-    <div class="card card-shadow border-0 mb-4">
-      <div class="card-header bg-transparent border-0 pt-3">
-        <h5 class="mb-0">
-          <i class="fas fa-chart-bar text-success me-2"></i>Weekly Hours
-        </h5>
-      </div>
-      <div class="card-body">
-        <% if (weeklySummary.length === 0) { %>
-          <p class="text-muted">No attendance data this week.</p>
-        <% } else { %>
-          <div class="d-flex align-items-end justify-content-between" style="height: 150px;">
-            <% const maxHours = Math.max(...weeklySummary.map(d => d.hours_worked || 0), 1); %>
-            <% weeklySummary.forEach(day => { %>
-              <div class="text-center" style="flex:1;">
-                <div style="height: <%= (day.hours_worked || 0) / maxHours * 120 %>px; width: 30px; background: <%= day.hours_worked ? '#4f46e5' : '#e5e7eb' %>; border-radius: 4px 4px 0 0; margin: 0 auto;"></div>
-                <small class="text-muted"><%= day.date ? new Date(day.date).toLocaleDateString('en-PH', { weekday: 'short' }) : '—' %></small>
-                <small class="d-block text-muted"><%= day.hours_worked || '0' %></small>
-              </div>
-            <% }) %>
-          </div>
-        <% } %>
-      </div>
-    </div>
-
-    <!-- Recent Activity (Admin Only) -->
-    <% if (isAdmin) { %>
-      <div class="card card-shadow border-0">
+      <!-- Recent Activity -->
+      <div class="card card-shadow border-0 mb-4">
         <div class="card-header bg-transparent border-0 pt-3">
           <h5 class="mb-0">
             <i class="fas fa-history text-primary me-2"></i>Recent Activity
@@ -209,18 +240,10 @@
           </div>
         </div>
       </div>
-    <% } %>
-  </div>
-
-    <!-- LEFT COLUMN (col-lg-8) -->
-    <div class="col-lg-8">
-      <!-- Today's Attendance -->
-      <!-- Weekly Summary Chart -->
-      <!-- Recent Activity -->
 
       <!-- Staff Currently Clocked In (Admin + HR) -->
-      <% if (isAdmin || user.role === 'hr_manager') { %>
-        <div class="card card-shadow border-0 mt-4">
+      <% if (isAdmin || (user && user.role === 'hr_manager')) { %>
+        <div class="card card-shadow border-0">
           <div class="card-header bg-transparent border-0 pt-3">
             <h5 class="mb-0">
               <i class="fas fa-users text-success me-2"></i>Staff Currently Clocked In
@@ -248,7 +271,9 @@
           </div>
         </div>
       <% } %>
+
     </div>
+    <!-- END LEFT COLUMN -->
 
     <!-- RIGHT COLUMN (col-lg-4) -->
     <div class="col-lg-4">
