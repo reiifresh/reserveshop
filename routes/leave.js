@@ -306,7 +306,7 @@ router.post('/leave/allocate', isHR, async (req, res) => {
       return res.redirect('/leave/allocate');
     }
 
-    // ─── SELF-ALLOCATION CHECK (ADD THIS) ───
+    // ─── SELF-ALLOCATION CHECK ───
     if (parseInt(staff_id) === req.session.userId) {
       req.session.message = '⚠️ You cannot allocate leave credits to yourself.';
       return res.redirect('/leave/allocate');
@@ -331,7 +331,55 @@ router.post('/leave/allocate', isHR, async (req, res) => {
       return res.redirect('/leave/allocate');
     }
 
-    // ... rest of the allocation logic
+    // ─── CHECK EXISTING BALANCE ───
+    console.log("🔍 Checking existing balance...");
+    const [existing] = await pool.query(
+      `SELECT * FROM leave_balances 
+       WHERE staff_id = ? AND leave_type = ? AND year = ?`,
+      [staff_id, leave_type, year]
+    );
+    console.log("✅ Existing balance check done. Found:", existing.length);
+
+    // ─── UPDATE OR INSERT ───
+    if (existing.length > 0) {
+      console.log("🔍 Updating existing balance...");
+      await pool.query(
+        `UPDATE leave_balances 
+         SET total_days = ?, remaining_days = total_days - used_days
+         WHERE staff_id = ? AND leave_type = ? AND year = ?`,
+        [days, staff_id, leave_type, year]
+      );
+      console.log("✅ Balance updated");
+    } else {
+      console.log("🔍 Inserting new balance...");
+      await pool.query(
+        `INSERT INTO leave_balances (staff_id, leave_type, total_days, remaining_days, year)
+         VALUES (?, ?, ?, ?, ?)`,
+        [staff_id, leave_type, days, days, year]
+      );
+      console.log("✅ Balance inserted");
+    }
+
+    // ─── LOG ACTIVITY (SAFE VERSION) ───
+    try {
+      console.log("🔍 Attempting to log activity...");
+      await logActivity(
+        req.session.userId,
+        req.session.email,
+        'LEAVE_ALLOCATED',
+        `Allocated ${days} ${leave_type} days to staff ID ${staff_id}`,
+        req
+      );
+      console.log("✅ Activity logged successfully");
+    } catch (logErr) {
+      console.error("❌ Failed to log activity:", logErr.message);
+      // Continue anyway — the allocation still succeeded
+    }
+
+    req.session.message = `✅ Allocated ${days} ${leave_type} days.`;
+    console.log("✅ Allocation complete, redirecting...");
+    res.redirect('/leave/allocate');
+
   } catch (err) {
     console.error("❌ Allocate error:", err);
     console.error("❌ Error stack:", err.stack);
