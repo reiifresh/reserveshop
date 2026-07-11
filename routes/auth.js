@@ -291,12 +291,13 @@ router.get('/forgot-password', (req, res) => {
   res.render('forgot', { message: null, error: null });
 });
 
-// --- ROUTE: Handle Forgot Password (Sends Email) ---
+// ─── ROUTE: Handle Forgot Password (Sends Email) ───
 router.post('/forgot-password', async (req, res) => {
+  console.log("🔍 Forgot password request received for:", req.body.email);
   const { email } = req.body;
 
   try {
-    // 👇 ADD THIS CONDITION
+    // 👇 FIXED: Only active users can reset password
     const [rows] = await pool.query(
       `SELECT * FROM users WHERE email = ? AND deleted_at IS NULL`,
       [email]
@@ -307,10 +308,36 @@ router.post('/forgot-password', async (req, res) => {
       return res.render('forgot', { message: null, error: 'No account with that email.' });
     }
 
-    // ... rest of the code
+    // Generate a secure random token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = Date.now() + 3600000; // 1 hour from now
+
+    // Save token to database
+    await pool.query(
+      `UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?`,
+      [token, expiry, user.id]
+    );
+
+    // Send the email (using Brevo API)
+    await sendResetEmail(email, token);
+
+    // Log activity
+    await logActivity(
+      user.id,
+      user.email,
+      'PASSWORD_RESET',
+      'Password reset requested',
+      req
+    );
+
+    res.render('forgot', {
+      message: '✅ Reset link sent! Check your email inbox (and spam folder).',
+      error: null
+    });
+
   } catch (err) {
-    console.error(err);
-    res.render('forgot', { message: null, error: 'Something went wrong.' });
+    console.error("❌ Forgot password error:", err);
+    res.render('forgot', { message: null, error: 'Something went wrong. Please try again.' });
   }
 });
 
@@ -323,7 +350,7 @@ router.get('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
 
   try {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE reset_token = ?`, [token]);
+    const [rows] = await pool.query(`SELECT * FROM users WHERE reset_token = ? AND deleted_at IS NULL`, [token]);
     const user = rows[0];
 
     if (!user || Date.now() > user.reset_token_expiry) {
