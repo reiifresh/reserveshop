@@ -72,12 +72,12 @@ router.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
 
-// --- ROUTE: Handle Login ---
+
+// ─── ROUTE: Handle Login ───
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 👇 ADD THIS CONDITION
     const [rows] = await pool.query(
       `SELECT * FROM users WHERE email = ? AND deleted_at IS NULL`,
       [email]
@@ -93,15 +93,33 @@ router.post('/login', async (req, res) => {
       return res.render('login', { error: 'Invalid email or password.' });
     }
 
+    // ─── SET SESSION ───
     req.session.userId = user.id;
     req.session.email = user.email;
     req.session.role = user.role;
     req.session.full_name = user.full_name || user.email || 'User';
 
-    res.redirect('/dashboard');
+    // ─── LOG THE LOGIN (ADD THIS) ───
+    await logActivity(
+      user.id,
+      user.email,
+      'LOGIN',
+      'User logged in successfully',
+      req
+    );
 
+    // ─── LOG FAILED LOGIN ATTEMPT ───
+    await logActivity(
+      null,
+      email,
+      'LOGIN_FAILED',
+      `Failed login attempt for ${email}`,
+      req
+    );
+
+    res.redirect('/dashboard');
   } catch (err) {
-    console.error(err);
+    console.error("❌ Login error:", err);
     res.render('login', { error: 'Database error.' });
   }
 });
