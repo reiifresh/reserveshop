@@ -219,4 +219,24 @@ router.post('/staff/restore/:id', isAdmin, async (req, res) => {
   }
 });
 
+// ─── UPDATE HOURLY RATE ───
+router.post('/staff/update-rate/:id', isHR, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { hourly_rate } = req.body;
+
+    await pool.query(
+      `UPDATE users SET hourly_rate = ? WHERE id = ?`,
+      [hourly_rate, id]
+    );
+
+    req.session.message = '✅ Hourly rate updated successfully!';
+    res.redirect('/staff');
+  } catch (err) {
+    console.error("❌ Update rate error:", err);
+    req.session.message = '❌ Failed to update rate.';
+    res.redirect('/staff');
+  }
+});
+
 module.exports = router;
