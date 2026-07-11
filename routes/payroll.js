@@ -15,13 +15,21 @@ router.get('/payroll', isHR, async (req, res) => {
     const endDate = new Date(selectedYear, selectedMonth, 0);
     const endDateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
 
-    // ─── FETCH ALL STAFF WITH HOURS ───
-    const [staff] = await pool.query(`
+    // ─── DYNAMIC WHERE CLAUSE ───
+    let whereClause = 'WHERE u.deleted_at IS NULL';
+    if (req.session.role === 'hr_manager') {
+      whereClause += ` AND u.role != 'admin'`;  // Hide Admin from HR
+    }
+
+    // ─── FETCH STAFF ───
+    const query = `
       SELECT 
         u.id,
         u.full_name,
         u.email,
+        u.pay_type,
         u.hourly_rate,
+        u.monthly_salary,
         COALESCE(SUM(a.hours_worked), 0) AS total_hours,
         COALESCE(SUM(CASE WHEN lr.leave_type = 'unpaid' AND lr.status = 'approved' THEN lr.days_requested * 8 ELSE 0 END), 0) AS unpaid_leave_hours
       FROM users u
@@ -32,27 +40,50 @@ router.get('/payroll', isHR, async (req, res) => {
         AND lr.leave_type = 'unpaid'
         AND lr.start_date <= ?
         AND lr.end_date >= ?
-      WHERE u.deleted_at IS NULL AND u.role NOT IN ('admin', 'hr_manager')
+      ${whereClause}
       GROUP BY u.id
-    `, [startDate, endDateStr, endDateStr, startDate]);
+    `;
+
+    const [staff] = await pool.query(query, [startDate, endDateStr, endDateStr, startDate]);
 
     // ─── CALCULATE PAYROLL ───
-    let payroll = staff.map(employee => {
-      const rate = parseFloat(employee.hourly_rate) || 0;
-      const totalHours = parseFloat(employee.total_hours) || 0;
-      const unpaidHours = parseFloat(employee.unpaid_leave_hours) || 0;
-      const netHours = Math.max(0, totalHours - unpaidHours);
-      const grossPay = netHours * rate;
+    let payroll = await Promise.all(staff.map(async (employee) => {
+      let grossPay = 0;
+      let netHours = 0;
+      let totalHours = parseFloat(employee.total_hours) || 0;
+      let unpaidHours = parseFloat(employee.unpaid_leave_hours) || 0;
+
+      if (employee.pay_type === 'salary') {
+        // ─── GET ACTUAL WORKING DAYS FOR SALARY EMPLOYEE ───
+        const [workDaysResult] = await pool.query(`
+          SELECT COUNT(*) as working_days 
+          FROM work_days 
+          WHERE staff_id = ? 
+            AND work_date BETWEEN ? AND ? 
+            AND is_work_day = 1
+        `, [employee.id, startDate, endDateStr]);
+
+        const workingDays = workDaysResult[0]?.working_days || 20;
+        const monthlySalary = parseFloat(employee.monthly_salary) || 0;
+        const dailyRate = monthlySalary / workingDays;
+        const deduction = (unpaidHours / 8) * dailyRate; // Convert hours to days
+
+        grossPay = monthlySalary - deduction;
+        netHours = totalHours;
+      } else {
+        const rate = parseFloat(employee.hourly_rate) || 0;
+        netHours = Math.max(0, totalHours - unpaidHours);
+        grossPay = netHours * rate;
+      }
 
       return {
         ...employee,
-        rate,
         totalHours,
         unpaidHours,
         netHours,
         grossPay
       };
-    });
+    }));
 
     // ─── TOTALS ───
     const totalPayroll = payroll.reduce((sum, emp) => sum + emp.grossPay, 0);
