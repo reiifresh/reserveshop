@@ -297,6 +297,7 @@ router.get('/leave/allocate', isHR, async (req, res) => {
 // ─── ADMIN/HR: Allocate Leave Credits (Submit) ───
 router.post('/leave/allocate', isHR, async (req, res) => {
   try {
+    console.log("🔍 Allocation request received:", req.body);
     const { staff_id, leave_type, days, year } = req.body;
 
     // ─── REQUIRED FIELDS CHECK ───
