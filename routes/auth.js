@@ -15,9 +15,10 @@ const logActivity = require('../helpers/activityLogger');
 
 
 // --- HELPER: Send email via Ethereal (fake SMTP) ---
-// --- HELPER: Send Password Reset Email via Brevo API ---
 async function sendResetEmail(email, token) {
   const resetLink = `https://${process.env.APP_URL || 'localhost:3000'}/reset-password/${token}`;
+
+  console.log("🔍 Sending password reset email to:", email);
 
   try {
     const response = await axios.post(
@@ -50,6 +51,7 @@ async function sendResetEmail(email, token) {
     return true;
   } catch (error) {
     console.error("❌ Password reset email error:", error.response?.data || error.message);
+    console.error("❌ Full error:", error);
     return false;
   }
 }
