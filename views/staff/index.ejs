@@ -26,7 +26,8 @@
           <th>Email</th>
           <th>Role</th>
           <th>Joined</th>
-          <th>Hourly Rate (₱)</th>
+          <!-- 👇 NEW COLUMN: PAY DETAILS -->
+          <th style="min-width: 280px;">Pay Details</th>
           <th class="text-center">Actions</th>
         </tr>
       </thead>
@@ -41,18 +42,39 @@
             </td>
             <td><%= new Date(user.created_at).toLocaleDateString() %></td>
 
-            <!-- Hourly Rate (with inline edit) -->
+            <!-- ─── PAY DETAILS FORM ─── -->
             <td>
-              <form method="POST" action="/staff/update-rate/<%= user.id %>" class="d-flex gap-1">
-                <input type="number" name="hourly_rate" value="<%= user.hourly_rate || 0 %>"
-                       class="form-control form-control-sm" style="width: 100px;" step="0.01" min="0">
-                <button type="submit" class="btn btn-sm btn-primary">
-                  <i class="fas fa-save"></i>
-                </button>
+              <form method="POST" action="/staff/update-pay/<%= user.id %>" class="row g-1 align-items-center">
+                <!-- Pay Type Dropdown -->
+                <div class="col-6">
+                  <select name="pay_type" class="form-select form-select-sm pay-type-select" data-id="<%= user.id %>">
+                    <option value="hourly" <%= user.pay_type === 'hourly' ? 'selected' : '' %>>Hourly</option>
+                    <option value="salary" <%= user.pay_type === 'salary' ? 'selected' : '' %>>Salary</option>
+                  </select>
+                </div>
+
+                <!-- Hourly Rate (visible if pay_type = hourly) -->
+                <div class="col-6 hourly-rate-input" id="hourly-rate-<%= user.id %>" style="<%= user.pay_type === 'salary' ? 'display:none' : '' %>">
+                  <input type="number" name="hourly_rate" value="<%= user.hourly_rate || 0 %>"
+                         class="form-control form-control-sm" step="0.01" min="0" placeholder="Rate">
+                </div>
+
+                <!-- Monthly Salary (visible if pay_type = salary) -->
+                <div class="col-6 monthly-salary-input" id="monthly-salary-<%= user.id %>" style="<%= user.pay_type === 'hourly' ? 'display:none' : '' %>">
+                  <input type="number" name="monthly_salary" value="<%= user.monthly_salary || 0 %>"
+                         class="form-control form-control-sm" step="0.01" min="0" placeholder="Salary">
+                </div>
+
+                <!-- Save Button -->
+                <div class="col-12">
+                  <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="fas fa-save me-1"></i>Update Pay
+                  </button>
+                </div>
               </form>
             </td>
 
-            <!-- Actions -->
+            <!-- ─── ACTIONS ─── -->
             <td class="text-center">
               <a href="/staff/delete/<%= user.id %>" class="btn btn-sm btn-outline-danger"
                  onclick="return confirm('Are you sure you want to remove this staff member?')">
@@ -71,5 +93,24 @@
     <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
   </a>
 </div>
+
+<!-- 👇 SCRIPT TO TOGGLE RATE/SALARY FIELDS -->
+<script>
+  document.querySelectorAll('.pay-type-select').forEach(select => {
+    select.addEventListener('change', function() {
+      const userId = this.dataset.id;
+      const hourlyDiv = document.getElementById('hourly-rate-' + userId);
+      const salaryDiv = document.getElementById('monthly-salary-' + userId);
+
+      if (this.value === 'salary') {
+        hourlyDiv.style.display = 'none';
+        salaryDiv.style.display = 'block';
+      } else {
+        hourlyDiv.style.display = 'block';
+        salaryDiv.style.display = 'none';
+      }
+    });
+  });
+</script>
 
 <%- include('../partials/footer') %>

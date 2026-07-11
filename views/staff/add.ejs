@@ -28,7 +28,7 @@
             <input type="email" name="email" class="form-control" placeholder="employee@company.com" required>
           </div>
 
-          <!-- 👇 ROLE DROPDOWN (NEW) -->
+          <!-- Role Dropdown -->
           <div class="mb-3">
             <label class="form-label">Role <span class="text-danger">*</span></label>
             <select name="role" class="form-select" required>
@@ -41,9 +41,29 @@
             </small>
           </div>
 
+          <!-- ─── PAY TYPE ─── -->
           <div class="mb-3">
+            <label class="form-label">Pay Type <span class="text-danger">*</span></label>
+            <select name="pay_type" class="form-select" id="payTypeSelect" required>
+              <option value="hourly">Hourly</option>
+              <option value="salary">Salary (Fixed Monthly)</option>
+            </select>
+            <small class="text-muted">
+              <strong>Hourly:</strong> Paid based on hours worked.<br>
+              <strong>Salary:</strong> Fixed monthly pay (for Admin/HR).
+            </small>
+          </div>
+
+          <!-- Hourly Rate (visible by default) -->
+          <div class="mb-3" id="hourlyRateField">
             <label class="form-label">Hourly Rate (₱)</label>
             <input type="number" name="hourly_rate" class="form-control" placeholder="500.00" step="0.01" min="0">
+          </div>
+
+          <!-- Monthly Salary (hidden by default) -->
+          <div class="mb-3" id="monthlySalaryField" style="display:none;">
+            <label class="form-label">Monthly Salary (₱)</label>
+            <input type="number" name="monthly_salary" class="form-control" placeholder="50000.00" step="0.01" min="0">
           </div>
 
           <hr>
@@ -59,5 +79,24 @@
     </div>
   </div>
 </div>
+
+<!-- 👇 SCRIPT TO TOGGLE RATE/SALARY FIELDS -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const payTypeSelect = document.getElementById('payTypeSelect');
+    const hourlyField = document.getElementById('hourlyRateField');
+    const salaryField = document.getElementById('monthlySalaryField');
+
+    payTypeSelect.addEventListener('change', function() {
+      if (this.value === 'salary') {
+        hourlyField.style.display = 'none';
+        salaryField.style.display = 'block';
+      } else {
+        hourlyField.style.display = 'block';
+        salaryField.style.display = 'none';
+      }
+    });
+  });
+</script>
 
 <%- include('../partials/footer') %>

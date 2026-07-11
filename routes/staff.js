@@ -87,7 +87,7 @@ router.get('/staff/add', isAdmin, (req, res) => {
 // --- ROUTE: Handle Add Staff (Admin Only) ---
 // --- ROUTE: Handle Add Staff (Admin Only) ---
 router.post('/staff/add', isAdmin, async (req, res) => {
-  const { email, fullName, role } = req.body;
+  const { email, fullName, role, pay_type, hourly_rate, monthly_salary } = req.body;
 
   if (!fullName || fullName.trim() === '') {
     return res.render('staff/add', { 
@@ -120,8 +120,8 @@ router.post('/staff/add', isAdmin, async (req, res) => {
 
     // 👇 ROLE IS NOW INCLUDED
     await pool.query(
-      `INSERT INTO users (email, password, role, full_name, hourly_rate) VALUES (?, ?, ?, ?, ?)`,
-      [email.trim(), hashedPassword, role || 'staff', fullName.trim(), req.body.hourly_rate || 0]
+      `INSERT INTO users (email, password, role, full_name, pay_type, hourly_rate, monthly_salary) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [email.trim(), hashedPassword, role || 'staff', fullName.trim(), pay_type || 'hourly', hourly_rate || 0, monthly_salary || 0]
     );
 
     await sendWelcomeEmail(email.trim(), tempPassword, role || 'staff');
@@ -235,6 +235,28 @@ router.post('/staff/update-rate/:id', isHR, async (req, res) => {
   } catch (err) {
     console.error("❌ Update rate error:", err);
     req.session.message = '❌ Failed to update rate.';
+    res.redirect('/staff');
+  }
+});
+
+// ─── UPDATE STAFF PAY DETAILS (Hourly / Salary) ───
+router.post('/staff/update-pay/:id', isHR, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pay_type, hourly_rate, monthly_salary } = req.body;
+
+    await pool.query(
+      `UPDATE users 
+       SET pay_type = ?, hourly_rate = ?, monthly_salary = ?
+       WHERE id = ?`,
+      [pay_type, hourly_rate || 0, monthly_salary || 0, id]
+    );
+
+    req.session.message = '✅ Pay details updated successfully!';
+    res.redirect('/staff');
+  } catch (err) {
+    console.error("❌ Update pay error:", err);
+    req.session.message = '❌ Failed to update pay details.';
     res.redirect('/staff');
   }
 });
