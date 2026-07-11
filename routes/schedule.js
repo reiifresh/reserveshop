@@ -189,8 +189,14 @@ router.post('/schedule/admin/action', isHR, async (req, res) => {
     }
 
     res.redirect('/schedule/admin');
-  } catch (err) {
+    
+    } catch (err) {
     console.error("❌ Admin schedule action error:", err);
+    console.error("❌ Full error details:", {
+      message: err.message,
+      sql: err.sql,
+      code: err.code
+    });
     req.session.message = '❌ Failed to process action.';
     res.redirect('/schedule/admin');
   }
