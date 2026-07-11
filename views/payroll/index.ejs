@@ -77,7 +77,7 @@
               <tr>
                 <td><%= emp.full_name || 'N/A' %></td>
                 <td><%= emp.email %></td>
-                <td>₱<%= emp.rate.toFixed(2) %></td>
+                <td>₱<%= emp.rate ? emp.rate.toFixed(2) : '0.00' %></td>
                 <td><%= emp.totalHours.toFixed(2) %></td>
                 <td><%= emp.unpaidHours.toFixed(2) %></td>
                 <td><strong><%= emp.netHours.toFixed(2) %></strong></td>

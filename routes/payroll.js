@@ -52,6 +52,7 @@ router.get('/payroll', isHR, async (req, res) => {
       let netHours = 0;
       let totalHours = parseFloat(employee.total_hours) || 0;
       let unpaidHours = parseFloat(employee.unpaid_leave_hours) || 0;
+      let rate = 0;
 
       if (employee.pay_type === 'salary') {
         // ─── GET ACTUAL WORKING DAYS FOR SALARY EMPLOYEE ───
@@ -70,10 +71,12 @@ router.get('/payroll', isHR, async (req, res) => {
 
         grossPay = monthlySalary - deduction;
         netHours = totalHours;
+        rate = monthlySalary;
       } else {
         const rate = parseFloat(employee.hourly_rate) || 0;
         netHours = Math.max(0, totalHours - unpaidHours);
         grossPay = netHours * rate;
+        rate = hourlyRate;
       }
 
       return {
@@ -81,7 +84,8 @@ router.get('/payroll', isHR, async (req, res) => {
         totalHours,
         unpaidHours,
         netHours,
-        grossPay
+        grossPay,
+        rate 
       };
     }));
 
