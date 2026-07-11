@@ -53,6 +53,7 @@
   </div>
 
   <!-- Activity Log Report -->
+  <% if (user && user.role === 'admin') { %>
   <div class="col-md-4">
     <div class="card card-shadow border-0 h-100">
       <div class="card-body text-center py-4">
@@ -75,6 +76,7 @@
       </div>
     </div>
   </div>
+  <% } %>
 
 </div>
 

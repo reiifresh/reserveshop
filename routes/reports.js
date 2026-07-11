@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/database');
-const { isHR } = require('../helpers/authMiddleware');
+const { isHR, isAdmin } = require('../helpers/authMiddleware');
 
 // ─── REPORTS DASHBOARD ───
 router.get('/reports', isHR, async (req, res) => {
@@ -104,7 +104,7 @@ router.get('/reports/leave', isHR, async (req, res) => {
 });
 
 // ─── EXPORT ACTIVITY LOG ───
-router.get('/reports/activity', isHR, async (req, res) => {
+router.get('/reports/activity', isAdmin, async (req, res) => {
   try {
     const { days } = req.query;
     let limit = days ? parseInt(days) : 30;
