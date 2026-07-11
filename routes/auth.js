@@ -85,11 +85,27 @@ router.post('/login', async (req, res) => {
     const user = rows[0];
 
     if (!user) {
+      // ─── LOG FAILED LOGIN (USER NOT FOUND) ───
+      await logActivity(
+        null,
+        email,
+        'LOGIN_FAILED',
+        `Failed login attempt for ${email} (user not found)`,
+        req
+      );
       return res.render('login', { error: 'Invalid email or password.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      // ─── LOG FAILED LOGIN (WRONG PASSWORD) ───
+      await logActivity(
+        user.id,
+        email,
+        'LOGIN_FAILED',
+        `Failed login attempt for ${email} (wrong password)`,
+        req
+      );
       return res.render('login', { error: 'Invalid email or password.' });
     }
 
@@ -99,21 +115,12 @@ router.post('/login', async (req, res) => {
     req.session.role = user.role;
     req.session.full_name = user.full_name || user.email || 'User';
 
-    // ─── LOG THE LOGIN (ADD THIS) ───
+    // ─── LOG SUCCESSFUL LOGIN ───
     await logActivity(
       user.id,
       user.email,
       'LOGIN',
       'User logged in successfully',
-      req
-    );
-
-    // ─── LOG FAILED LOGIN ATTEMPT ───
-    await logActivity(
-      null,
-      email,
-      'LOGIN_FAILED',
-      `Failed login attempt for ${email}`,
       req
     );
 
@@ -123,7 +130,6 @@ router.post('/login', async (req, res) => {
     res.render('login', { error: 'Database error.' });
   }
 });
-
 
 // ─── Undertime Staff Report ───
 router.get('/undertime', isAdmin, async (req, res) => {
