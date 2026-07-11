@@ -1,5 +1,13 @@
 <%- include('../partials/header') %>
 
+<%
+  // ─── HELPER: Format number with commas ───
+  function formatNumber(num) {
+    if (!num && num !== 0) return '0.00';
+    return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+%>
+
 <div class="row mt-4">
   <div class="col-12">
     <h2><i class="fas fa-coins text-success me-2"></i>Payroll</h2>
@@ -77,11 +85,11 @@
               <tr>
                 <td><%= emp.full_name || 'N/A' %></td>
                 <td><%= emp.email %></td>
-                <td>₱<%= emp.rate ? emp.rate.toFixed(2) : '0.00' %></td>
-                <td><%= emp.totalHours.toFixed(2) %></td>
-                <td><%= emp.unpaidHours.toFixed(2) %></td>
-                <td><strong><%= emp.netHours.toFixed(2) %></strong></td>
-                <td><strong>₱<%= emp.grossPay.toFixed(2) %></strong></td>
+                <td>₱<%= formatNumber(emp.rate) %></td>
+                <td><%= formatNumber(emp.totalHours) %></td>
+                <td><%= formatNumber(emp.unpaidHours) %></td>
+                <td><strong><%= formatNumber(emp.netHours) %></strong></td>
+                <td><strong>₱<%= formatNumber(emp.grossPay) %></strong></td>
               </tr>
             <% }) %>
           </tbody>
