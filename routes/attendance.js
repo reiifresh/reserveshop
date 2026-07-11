@@ -24,7 +24,7 @@ router.get('/attendance', isAuthenticated, async (req, res) => {
     );
 
     let clockedInStaff = [];
-    if (isAdmin) {
+    if (isAdmin || isHR ) {
       const [staff] = await pool.query(`
         SELECT u.id, u.email, u.full_name, a.check_in, a.date 
         FROM attendance a
