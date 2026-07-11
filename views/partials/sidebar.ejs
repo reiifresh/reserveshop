@@ -67,6 +67,11 @@
       </a>
     <% } %>
 
+      <a class="nav-link text-white d-flex align-items-center gap-2 py-2 px-3 rounded" href="/payroll">
+        <i class="fas fa-coins" style="width: 20px;"></i>
+        <span>Payroll</span>
+      </a>
+
     <!-- Admin Section (Admin Only) -->
     <% if (user && user.role === 'admin') { %>
       <hr class="text-secondary my-2">

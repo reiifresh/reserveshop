@@ -120,8 +120,8 @@ router.post('/staff/add', isAdmin, async (req, res) => {
 
     // 👇 ROLE IS NOW INCLUDED
     await pool.query(
-      `INSERT INTO users (email, password, role, full_name) VALUES (?, ?, ?, ?)`,
-      [email.trim(), hashedPassword, role || 'staff', fullName.trim()]
+      `INSERT INTO users (email, password, role, full_name, hourly_rate) VALUES (?, ?, ?, ?, ?)`,
+      [email.trim(), hashedPassword, role || 'staff', fullName.trim(), req.body.hourly_rate || 0]
     );
 
     await sendWelcomeEmail(email.trim(), tempPassword, role || 'staff');
