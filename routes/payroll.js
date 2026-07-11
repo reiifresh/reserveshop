@@ -18,7 +18,7 @@ router.get('/payroll', isHR, async (req, res) => {
     // ─── DYNAMIC WHERE CLAUSE ───
     let whereClause = 'WHERE u.deleted_at IS NULL';
     if (req.session.role === 'hr_manager') {
-      whereClause += ` AND u.role != 'admin'`;  // Hide Admin from HR
+      whereClause += ` AND u.role != 'admin'`;
     }
 
     // ─── FETCH STAFF ───
@@ -52,10 +52,10 @@ router.get('/payroll', isHR, async (req, res) => {
       let netHours = 0;
       let totalHours = parseFloat(employee.total_hours) || 0;
       let unpaidHours = parseFloat(employee.unpaid_leave_hours) || 0;
-      let rate = 0;
+      let rate = 0; // 👈 DEFINED ONCE
 
       if (employee.pay_type === 'salary') {
-        // ─── GET ACTUAL WORKING DAYS FOR SALARY EMPLOYEE ───
+        // ─── SALARY EMPLOYEE ───
         const [workDaysResult] = await pool.query(`
           SELECT COUNT(*) as working_days 
           FROM work_days 
@@ -67,15 +67,17 @@ router.get('/payroll', isHR, async (req, res) => {
         const workingDays = workDaysResult[0]?.working_days || 20;
         const monthlySalary = parseFloat(employee.monthly_salary) || 0;
         const dailyRate = monthlySalary / workingDays;
-        const deduction = (unpaidHours / 8) * dailyRate; // Convert hours to days
+        const deduction = (unpaidHours / 8) * dailyRate;
 
         grossPay = monthlySalary - deduction;
         netHours = totalHours;
         rate = monthlySalary;
+
       } else {
-        const rate = parseFloat(employee.hourly_rate) || 0;
+        // ─── HOURLY EMPLOYEE ───
+        const hourlyRate = parseFloat(employee.hourly_rate) || 0;
         netHours = Math.max(0, totalHours - unpaidHours);
-        grossPay = netHours * rate;
+        grossPay = netHours * hourlyRate;
         rate = hourlyRate;
       }
 
@@ -85,7 +87,7 @@ router.get('/payroll', isHR, async (req, res) => {
         unpaidHours,
         netHours,
         grossPay,
-        rate 
+        rate
       };
     }));
 
