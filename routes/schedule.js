@@ -3,6 +3,8 @@ const router = express.Router();
 const pool = require('../db/database');
 const { isAuthenticated, isAdmin, isHR } = require('../helpers/authMiddleware');
 
+const logActivity = require('../helpers/activityLogger');
+
 
 
 
@@ -189,7 +191,7 @@ router.post('/schedule/admin/action', isHR, async (req, res) => {
     }
 
     res.redirect('/schedule/admin');
-    
+
     } catch (err) {
     console.error("❌ Admin schedule action error:", err);
     console.error("❌ Full error details:", {
