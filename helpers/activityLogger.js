@@ -1,4 +1,5 @@
 const pool = require('../db/database');
+const axios = require('axios'); // 👈 ADD THIS
 
 // Helper: Get country code from IP address
 async function getCountryFromIP(ip) {
@@ -8,12 +9,12 @@ async function getCountryFromIP(ip) {
   }
 
   try {
-    // Use free IP geolocation API
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,countryCode`);
-    const data = await response.json();
+    const response = await axios.get(`http://ip-api.com/json/${ip}?fields=status,countryCode`, {
+      timeout: 3000 // 3 second timeout to avoid hanging
+    });
     
-    if (data.status === 'success') {
-      return data.countryCode;
+    if (response.data && response.data.status === 'success') {
+      return response.data.countryCode;
     }
     return null;
   } catch (err) {
@@ -27,7 +28,7 @@ async function logActivity(userId, userEmail, action, details = null, req = null
     const ipAddress = req ? req.ip || req.connection?.remoteAddress || null : null;
     const userAgent = req ? req.headers['user-agent'] || null : null;
 
-    // 👇 GET COUNTRY CODE FROM IP
+    // Get country code from IP
     let countryCode = null;
     if (ipAddress) {
       countryCode = await getCountryFromIP(ipAddress);
