@@ -334,6 +334,7 @@ router.post('/leave/allocate', isHR, async (req, res) => {
     // ... rest of the allocation logic
   } catch (err) {
     console.error("❌ Allocate error:", err);
+    console.error("❌ Error stack:", err.stack);
     req.session.message = '❌ Failed to allocate leave.';
     res.redirect('/leave/allocate');
   }
