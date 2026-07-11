@@ -201,7 +201,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
 
     // ─── Staff Clocked In (admin only) ───
     let clockedInStaff = [];
-    if (isAdmin) {
+    if (isAdmin || req.session.role === 'hr_manager') {
       const [staff] = await pool.query(`
         SELECT u.id, u.email, u.full_name, a.check_in 
         FROM attendance a
